@@ -1,8 +1,8 @@
 import { createClient } from '@/lib/supabase/server';
 
 export interface LevelStats {
-  moves: number;
-  time: number;
+  moves?: number;
+  time?: number;
   completed_at?: string;
   attempts?: number;
   best_moves?: number;
