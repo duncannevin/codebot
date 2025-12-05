@@ -1,0 +1,31 @@
+<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background Circle -->
+  <circle cx="100" cy="100" r="90" fill="#2563eb"/>
+  
+  <!-- Robot Head -->
+  <rect x="60" y="60" width="80" height="70" fill="#ffffff" rx="8"/>
+  
+  <!-- Antenna -->
+  <line x1="100" y1="60" x2="100" y2="40" stroke="#ffffff" stroke-width="4" stroke-linecap="round"/>
+  <circle cx="100" cy="35" r="6" fill="#fbbf24"/>
+  
+  <!-- Eyes -->
+  <circle cx="80" cy="85" r="8" fill="#2563eb"/>
+  <circle cx="120" cy="85" r="8" fill="#2563eb"/>
+  <circle cx="82" cy="83" r="3" fill="#ffffff"/>
+  <circle cx="122" cy="83" r="3" fill="#ffffff"/>
+  
+  <!-- Mouth/Display -->
+  <rect x="70" y="105" width="60" height="15" fill="#10b981" rx="3"/>
+  <text x="100" y="116" font-family="monospace" font-size="10" fill="#ffffff" text-anchor="middle">&lt;/&gt;</text>
+  
+  <!-- Body -->
+  <rect x="65" y="135" width="70" height="50" fill="#ffffff" rx="5"/>
+  
+  <!-- Arms -->
+  <rect x="40" y="145" width="20" height="8" fill="#ffffff" rx="4"/>
+  <rect x="140" y="145" width="20" height="8" fill="#ffffff" rx="4"/>
+  
+  <!-- Code Symbol -->
+  <text x="100" y="165" font-family="monospace" font-size="20" fill="#2563eb" text-anchor="middle" font-weight="bold">{}</text>
+</svg>

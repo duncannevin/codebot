@@ -1,0 +1,20 @@
+<svg width="300" height="80" viewBox="0 0 300 80" xmlns="http://www.w3.org/2000/svg">
+  <!-- Icon -->
+  <rect x="10" y="10" width="60" height="60" fill="#2563eb" rx="10"/>
+  
+  <!-- Robot -->
+  <rect x="25" y="22" width="30" height="26" fill="#ffffff" rx="3"/>
+  <line x1="40" y1="22" x2="40" y2="15" stroke="#ffffff" stroke-width="3"/>
+  <circle cx="40" cy="13" r="3" fill="#fbbf24"/>
+  <circle cx="33" cy="30" r="3" fill="#2563eb"/>
+  <circle cx="47" cy="30" r="3" fill="#2563eb"/>
+  <rect x="30" y="38" width="20" height="5" fill="#10b981" rx="2"/>
+  
+  <!-- Body -->
+  <rect x="27" y="50" width="26" height="15" fill="#ffffff" rx="2"/>
+  <text x="40" y="61" font-family="monospace" font-size="8" fill="#2563eb" text-anchor="middle" font-weight="bold">&lt;/&gt;</text>
+  
+  <!-- Text -->
+  <text x="90" y="50" font-family="Arial, sans-serif" font-size="36" fill="#2563eb" font-weight="bold">Code Bot</text>
+  <text x="90" y="68" font-family="Arial, sans-serif" font-size="14" fill="#64748b">Learn JavaScript by Coding</text>
+</svg>

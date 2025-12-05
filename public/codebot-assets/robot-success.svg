@@ -1,0 +1,45 @@
+<svg width="100" height="120" viewBox="0 0 100 120" xmlns="http://www.w3.org/2000/svg">
+  <!-- Shadow -->
+  <ellipse cx="50" cy="115" rx="30" ry="5" fill="#94a3b8" opacity="0.3"/>
+  
+  <!-- Robot Body -->
+  <rect x="25" y="20" width="50" height="45" fill="#10b981" rx="5"/>
+  <rect x="27" y="22" width="46" height="41" fill="#34d399" rx="4"/>
+  
+  <!-- Antenna with sparkle -->
+  <line x1="50" y1="20" x2="50" y2="8" stroke="#64748b" stroke-width="3" stroke-linecap="round"/>
+  <circle cx="50" cy="5" r="5" fill="#fbbf24"/>
+  <circle cx="50" cy="5" r="3" fill="#f59e0b"/>
+  <circle cx="55" cy="3" r="2" fill="#fef3c7"/>
+  
+  <!-- Happy Eyes -->
+  <path d="M 30 36 Q 37 42 44 36" stroke="#1e293b" stroke-width="3" fill="none" stroke-linecap="round"/>
+  <path d="M 56 36 Q 63 42 70 36" stroke="#1e293b" stroke-width="3" fill="none" stroke-linecap="round"/>
+  
+  <!-- Happy Display -->
+  <rect x="32" y="48" width="36" height="10" fill="#fbbf24" rx="2"/>
+  <text x="50" y="56" font-family="monospace" font-size="7" fill="#ffffff" text-anchor="middle">SUCCESS!</text>
+  
+  <!-- Body/Torso -->
+  <rect x="20" y="68" width="60" height="40" fill="#10b981" rx="5"/>
+  <rect x="22" y="70" width="56" height="36" fill="#34d399" rx="4"/>
+  
+  <!-- Control Panel - all green -->
+  <circle cx="35" cy="85" r="4" fill="#10b981"/>
+  <circle cx="50" cy="85" r="4" fill="#10b981"/>
+  <circle cx="65" cy="85" r="4" fill="#10b981"/>
+  
+  <!-- Star Icon -->
+  <text x="50" y="102" font-size="16" text-anchor="middle">⭐</text>
+  
+  <!-- Arms - raised in celebration -->
+  <rect x="10" y="70" width="8" height="20" fill="#10b981" rx="4" transform="rotate(-30 14 70)"/>
+  <circle cx="8" cy="85" r="5" fill="#34d399"/>
+  
+  <rect x="82" y="70" width="8" height="20" fill="#10b981" rx="4" transform="rotate(30 86 70)"/>
+  <circle cx="92" cy="85" r="5" fill="#34d399"/>
+  
+  <!-- Legs -->
+  <rect x="30" y="108" width="12" height="8" fill="#10b981" rx="2"/>
+  <rect x="58" y="108" width="12" height="8" fill="#10b981" rx="2"/>
+</svg>

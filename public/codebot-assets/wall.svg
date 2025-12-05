@@ -1,0 +1,20 @@
+<svg width="64" height="64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+  <!-- Base -->
+  <rect width="64" height="64" fill="#1e293b" rx="4"/>
+  
+  <!-- Brick pattern -->
+  <rect x="2" y="2" width="60" height="60" fill="#334155" rx="3"/>
+  
+  <!-- Highlight -->
+  <rect x="4" y="4" width="56" height="2" fill="#475569" opacity="0.5"/>
+  <rect x="4" y="4" width="2" height="56" fill="#475569" opacity="0.5"/>
+  
+  <!-- Shadow -->
+  <rect x="4" y="58" width="56" height="2" fill="#0f172a" opacity="0.8"/>
+  <rect x="58" y="4" width="2" height="56" fill="#0f172a" opacity="0.8"/>
+  
+  <!-- Texture lines -->
+  <line x1="10" y1="15" x2="54" y2="15" stroke="#475569" stroke-width="0.5" opacity="0.3"/>
+  <line x1="10" y1="32" x2="54" y2="32" stroke="#475569" stroke-width="0.5" opacity="0.3"/>
+  <line x1="10" y1="49" x2="54" y2="49" stroke="#475569" stroke-width="0.5" opacity="0.3"/>
+</svg>

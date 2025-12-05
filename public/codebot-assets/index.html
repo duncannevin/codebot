@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Code Bot Assets - Visual Index</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+            margin: 0;
+            padding: 40px;
+            background: #f8fafc;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2563eb;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            color: #64748b;
+            margin-bottom: 40px;
+        }
+        .section {
+            margin-bottom: 50px;
+        }
+        .section h2 {
+            color: #1e293b;
+            border-bottom: 3px solid #2563eb;
+            padding-bottom: 10px;
+            margin-bottom: 30px;
+        }
+        .asset-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 20px;
+        }
+        .asset-card {
+            background: #f8fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            transition: all 0.3s;
+        }
+        .asset-card:hover {
+            border-color: #2563eb;
+            transform: translateY(-4px);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);
+        }
+        .asset-card img {
+            max-width: 100%;
+            height: auto;
+            margin-bottom: 12px;
+        }
+        .asset-name {
+            font-size: 12px;
+            color: #1e293b;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        .asset-size {
+            font-size: 10px;
+            color: #94a3b8;
+        }
+        .large-preview {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 40px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .color-palette {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        .color-swatch {
+            text-align: center;
+        }
+        .color-box {
+            width: 80px;
+            height: 80px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            border: 2px solid #e2e8f0;
+        }
+        .color-label {
+            font-size: 11px;
+            color: #64748b;
+            font-weight: 600;
+        }
+        .color-code {
+            font-size: 10px;
+            color: #94a3b8;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🤖 Code Bot Assets</h1>
+        <p class="subtitle">Complete visual reference for all application assets</p>
+
+        <!-- Logos Section -->
+        <div class="section">
+            <h2>Logos & Branding</h2>
+            <div class="asset-grid">
+                <div class="asset-card">
+                    <img src="logos/logo-main.svg" alt="Main Logo">
+                    <div class="asset-name">logo-main.svg</div>
+                    <div class="asset-size">200x200px</div>
+                </div>
+                <div class="asset-card">
+                    <img src="logos/logo-icon.svg" alt="Icon Logo">
+                    <div class="asset-name">logo-icon.svg</div>
+                    <div class="asset-size">48x48px</div>
+                </div>
+                <div class="asset-card">
+                    <img src="logos/logo-horizontal.svg" alt="Horizontal Logo">
+                    <div class="asset-name">logo-horizontal.svg</div>
+                    <div class="asset-size">300x80px</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Robot Characters Section -->
+        <div class="section">
+            <h2>Robot Characters</h2>
+            <div class="asset-grid">
+                <div class="asset-card">
+                    <img src="icons/robot-default.svg" alt="Default Robot">
+                    <div class="asset-name">robot-default.svg</div>
+                    <div class="asset-size">100x120px</div>
+                </div>
+                <div class="asset-card">
+                    <img src="icons/robot-success.svg" alt="Success Robot">
+                    <div class="asset-name">robot-success.svg</div>
+                    <div class="asset-size">100x120px</div>
+                </div>
+                <div class="asset-card">
+                    <img src="icons/robot-error.svg" alt="Error Robot">
+                    <div class="asset-name">robot-error.svg</div>
+                    <div class="asset-size">100x120px</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Maze Elements Section -->
+        <div class="section">
+            <h2>Maze Elements</h2>
+            <div class="asset-grid">
+                <div class="asset-card">
+                    <img src="maze-elements/wall.svg" alt="Wall">
+                    <div class="asset-name">wall.svg</div>
+                    <div class="asset-size">64x64px</div>
+                </div>
+                <div class="asset-card">
+                    <img src="maze-elements/path.svg" alt="Path">
+                    <div class="asset-name">path.svg</div>
+                    <div class="asset-size">64x64px</div>
+                </div>
+                <div class="asset-card">
+                    <img src="maze-elements/start.svg" alt="Start">
+                    <div class="asset-name">start.svg</div>
+                    <div class="asset-size">64x64px</div>
+                </div>
+                <div class="asset-card">
+                    <img src="maze-elements/goal.svg" alt="Goal">
+                    <div class="asset-name">goal.svg</div>
+                    <div class="asset-size">64x64px</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- UI Icons Section -->
+        <div class="section">
+            <h2>UI Icons</h2>
+            <div class="asset-grid">
+                <div class="asset-card">
+                    <img src="icons/play.svg" alt="Play">
+                    <div class="asset-name">play.svg</div>
+                    <div class="asset-size">32x32px</div>
+                </div>
+                <div class="asset-card">
+                    <img src="icons/step.svg" alt="Step">
+                    <div class="asset-name">step.svg</div>
+                    <div class="asset-size">32x32px</div>
+                </div>
+                <div class="asset-card">
+                    <img src="icons/reset.svg" alt="Reset">
+                    <div class="asset-name">reset.svg</div>
+                    <div class="asset-size">32x32px</div>
+                </div>
+                <div class="asset-card">
+                    <img src="icons/hint.svg" alt="Hint">
+                    <div class="asset-name">hint.svg</div>
+                    <div class="asset-size">32x32px</div>
+                </div>
+                <div class="asset-card">
+                    <img src="icons/github.svg" alt="GitHub">
+                    <div class="asset-name">github.svg</div>
+                    <div class="asset-size">48x48px</div>
+                </div>
+                <div class="asset-card">
+                    <img src="icons/checkmark.svg" alt="Checkmark">
+                    <div class="asset-name">checkmark.svg</div>
+                    <div class="asset-size">48x48px</div>
+                </div>
+                <div class="asset-card">
+                    <img src="icons/error-x.svg" alt="Error">
+                    <div class="asset-name">error-x.svg</div>
+                    <div class="asset-size">48x48px</div>
+                </div>
+                <div class="asset-card">
+                    <img src="icons/badge.svg" alt="Badge">
+                    <div class="asset-name">badge.svg</div>
+                    <div class="asset-size">80x100px</div>
+                </div>
+                <div class="asset-card">
+                    <img src="icons/trophy.svg" alt="Trophy">
+                    <div class="asset-name">trophy.svg</div>
+                    <div class="asset-size">64x64px</div>
+                </div>
+                <div class="asset-card">
+                    <img src="icons/lock.svg" alt="Lock">
+                    <div class="asset-name">lock.svg</div>
+                    <div class="asset-size">48x48px</div>
+                </div>
+                <div class="asset-card">
+                    <img src="icons/stars-5.svg" alt="5 Stars">
+                    <div class="asset-name">stars-5.svg</div>
+                    <div class="asset-size">160x32px</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- UI Components Section -->
+        <div class="section">
+            <h2>UI Components</h2>
+            <div class="asset-grid">
+                <div class="asset-card">
+                    <img src="ui-components/spinner.svg" alt="Spinner">
+                    <div class="asset-name">spinner.svg</div>
+                    <div class="asset-size">64x64px</div>
+                </div>
+                <div class="asset-card">
+                    <img src="ui-components/progress-bar.svg" alt="Progress Bar">
+                    <div class="asset-name">progress-bar.svg</div>
+                    <div class="asset-size">200x24px</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Background Section -->
+        <div class="section">
+            <h2>Backgrounds</h2>
+            <div class="large-preview">
+                <img src="images/hero-background.svg" alt="Hero Background" style="max-width: 100%; border-radius: 8px;">
+                <div style="color: white; margin-top: 20px;">
+                    <div class="asset-name" style="color: white; font-size: 14px;">hero-background.svg</div>
+                    <div class="asset-size" style="color: rgba(255,255,255,0.8);">1200x600px</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Color Palette Section -->
+        <div class="section">
+            <h2>Color Palette</h2>
+            <div class="color-palette">
+                <div class="color-swatch">
+                    <div class="color-box" style="background: #2563eb;"></div>
+                    <div class="color-label">Primary Blue</div>
+                    <div class="color-code">#2563eb</div>
+                </div>
+                <div class="color-swatch">
+                    <div class="color-box" style="background: #10b981;"></div>
+                    <div class="color-label">Success Green</div>
+                    <div class="color-code">#10b981</div>
+                </div>
+                <div class="color-swatch">
+                    <div class="color-box" style="background: #f59e0b;"></div>
+                    <div class="color-label">Goal Orange</div>
+                    <div class="color-code">#f59e0b</div>
+                </div>
+                <div class="color-swatch">
+                    <div class="color-box" style="background: #ef4444;"></div>
+                    <div class="color-label">Error Red</div>
+                    <div class="color-code">#ef4444</div>
+                </div>
+                <div class="color-swatch">
+                    <div class="color-box" style="background: #fbbf24;"></div>
+                    <div class="color-label">Hint Yellow</div>
+                    <div class="color-code">#fbbf24</div>
+                </div>
+                <div class="color-swatch">
+                    <div class="color-box" style="background: #1e293b;"></div>
+                    <div class="color-label">Dark</div>
+                    <div class="color-code">#1e293b</div>
+                </div>
+                <div class="color-swatch">
+                    <div class="color-box" style="background: #64748b;"></div>
+                    <div class="color-label">Gray</div>
+                    <div class="color-code">#64748b</div>
+                </div>
+                <div class="color-swatch">
+                    <div class="color-box" style="background: #f8fafc;"></div>
+                    <div class="color-label">Light</div>
+                    <div class="color-code">#f8fafc</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div style="margin-top: 60px; padding-top: 30px; border-top: 2px solid #e2e8f0; text-align: center; color: #64748b;">
+            <p><strong>Code Bot Assets v1.0.0</strong></p>
+            <p>26 total assets • All SVG format • Fully scalable</p>
+            <p style="font-size: 12px; margin-top: 20px;">See README.md for detailed usage instructions</p>
+        </div>
+    </div>
+</body>
+</html>

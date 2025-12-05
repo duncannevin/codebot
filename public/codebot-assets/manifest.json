@@ -1,0 +1,235 @@
+{
+  "name": "Code Bot Assets",
+  "version": "1.0.0",
+  "description": "Complete asset package for Code Bot JavaScript learning application",
+  "lastUpdated": "2024-12-04",
+  "totalAssets": 26,
+  "categories": {
+    "logos": {
+      "description": "Brand logos and identity assets",
+      "path": "logos/",
+      "assets": [
+        {
+          "filename": "logo-main.svg",
+          "dimensions": "200x200",
+          "purpose": "Main circular logo for app icon, favicon, social media",
+          "colors": ["#2563eb", "#ffffff"]
+        },
+        {
+          "filename": "logo-icon.svg",
+          "dimensions": "48x48",
+          "purpose": "Compact icon version for navigation and small spaces",
+          "colors": ["#2563eb", "#ffffff", "#fbbf24"]
+        },
+        {
+          "filename": "logo-horizontal.svg",
+          "dimensions": "300x80",
+          "purpose": "Horizontal logo with text for headers and marketing",
+          "colors": ["#2563eb", "#ffffff", "#64748b"]
+        }
+      ]
+    },
+    "icons": {
+      "description": "UI and functional icons",
+      "path": "icons/",
+      "assets": [
+        {
+          "filename": "robot-default.svg",
+          "dimensions": "100x120",
+          "purpose": "Default robot character state",
+          "state": "neutral",
+          "colors": ["#3b82f6", "#60a5fa"]
+        },
+        {
+          "filename": "robot-success.svg",
+          "dimensions": "100x120",
+          "purpose": "Success/happy robot state",
+          "state": "success",
+          "colors": ["#10b981", "#34d399"]
+        },
+        {
+          "filename": "robot-error.svg",
+          "dimensions": "100x120",
+          "purpose": "Error/sad robot state",
+          "state": "error",
+          "colors": ["#ef4444", "#f87171"]
+        },
+        {
+          "filename": "github.svg",
+          "dimensions": "48x48",
+          "purpose": "GitHub OAuth authentication button",
+          "colors": ["#24292f", "#ffffff"]
+        },
+        {
+          "filename": "play.svg",
+          "dimensions": "32x32",
+          "purpose": "Run code execution button",
+          "colors": ["#10b981", "#34d399"]
+        },
+        {
+          "filename": "step.svg",
+          "dimensions": "32x32",
+          "purpose": "Step through code debug button",
+          "colors": ["#3b82f6", "#60a5fa"]
+        },
+        {
+          "filename": "reset.svg",
+          "dimensions": "32x32",
+          "purpose": "Reset game state button",
+          "colors": ["#64748b", "#94a3b8"]
+        },
+        {
+          "filename": "hint.svg",
+          "dimensions": "32x32",
+          "purpose": "Get hint/help button",
+          "colors": ["#fbbf24", "#fde68a"]
+        },
+        {
+          "filename": "stars-5.svg",
+          "dimensions": "160x32",
+          "purpose": "5-star rating display",
+          "colors": ["#fbbf24", "#f59e0b"]
+        },
+        {
+          "filename": "badge.svg",
+          "dimensions": "80x100",
+          "purpose": "Achievement badge icon",
+          "colors": ["#3b82f6", "#fbbf24"]
+        },
+        {
+          "filename": "trophy.svg",
+          "dimensions": "64x64",
+          "purpose": "Level completion trophy",
+          "colors": ["#fbbf24", "#fde68a", "#64748b"]
+        },
+        {
+          "filename": "lock.svg",
+          "dimensions": "48x48",
+          "purpose": "Locked level indicator",
+          "colors": ["#64748b", "#94a3b8"]
+        },
+        {
+          "filename": "arrows.svg",
+          "dimensions": "128x32",
+          "purpose": "Navigation arrows (left, right, up)",
+          "colors": ["#2563eb", "#e2e8f0", "#64748b"]
+        },
+        {
+          "filename": "checkmark.svg",
+          "dimensions": "48x48",
+          "purpose": "Success/completed indicator",
+          "colors": ["#10b981", "#34d399"]
+        },
+        {
+          "filename": "error-x.svg",
+          "dimensions": "48x48",
+          "purpose": "Error/failure indicator",
+          "colors": ["#ef4444", "#f87171"]
+        }
+      ]
+    },
+    "maze-elements": {
+      "description": "Game maze tile assets",
+      "path": "maze-elements/",
+      "tileSize": "64x64",
+      "assets": [
+        {
+          "filename": "wall.svg",
+          "dimensions": "64x64",
+          "purpose": "Maze wall/obstacle tile",
+          "colors": ["#1e293b", "#334155"]
+        },
+        {
+          "filename": "path.svg",
+          "dimensions": "64x64",
+          "purpose": "Empty walkable path tile",
+          "colors": ["#f0f9ff", "#ffffff", "#e0e7ff"]
+        },
+        {
+          "filename": "start.svg",
+          "dimensions": "64x64",
+          "purpose": "Starting position tile",
+          "colors": ["#10b981", "#a7f3d0"]
+        },
+        {
+          "filename": "goal.svg",
+          "dimensions": "64x64",
+          "purpose": "Goal/target destination tile",
+          "colors": ["#f59e0b", "#fde68a", "#fbbf24"]
+        }
+      ]
+    },
+    "images": {
+      "description": "Large graphics and backgrounds",
+      "path": "images/",
+      "assets": [
+        {
+          "filename": "hero-background.svg",
+          "dimensions": "1200x600",
+          "purpose": "Hero section gradient background with code snippets",
+          "colors": ["#667eea", "#764ba2", "#f093fb"]
+        }
+      ]
+    },
+    "ui-components": {
+      "description": "Reusable UI components",
+      "path": "ui-components/",
+      "assets": [
+        {
+          "filename": "spinner.svg",
+          "dimensions": "64x64",
+          "purpose": "Loading spinner animation",
+          "animated": true,
+          "colors": ["#2563eb", "#e2e8f0"]
+        },
+        {
+          "filename": "progress-bar.svg",
+          "dimensions": "200x24",
+          "purpose": "Progress indicator component",
+          "customizable": true,
+          "colors": ["#10b981", "#34d399", "#e2e8f0"]
+        }
+      ]
+    }
+  },
+  "colorPalette": {
+    "primary": {
+      "blue": "#2563eb",
+      "lightBlue": "#60a5fa"
+    },
+    "success": {
+      "green": "#10b981",
+      "lightGreen": "#34d399"
+    },
+    "warning": {
+      "orange": "#f59e0b",
+      "lightOrange": "#fde68a"
+    },
+    "error": {
+      "red": "#ef4444",
+      "lightRed": "#f87171"
+    },
+    "accent": {
+      "yellow": "#fbbf24",
+      "lightYellow": "#fef3c7"
+    },
+    "neutral": {
+      "dark": "#1e293b",
+      "gray": "#64748b",
+      "lightGray": "#94a3b8",
+      "veryLight": "#f8fafc",
+      "white": "#ffffff"
+    }
+  },
+  "usage": {
+    "format": "SVG",
+    "scalable": true,
+    "cssCustomizable": true,
+    "webOptimized": true
+  },
+  "files": {
+    "readme": "README.md",
+    "visualIndex": "index.html",
+    "manifest": "manifest.json"
+  }
+}

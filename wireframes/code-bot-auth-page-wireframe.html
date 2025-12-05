@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Code Bot - Auth Page Wireframe</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: #f0f0f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        svg {
+            max-width: 100%;
+            height: auto;
+            background: white;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+    <svg width="1200" height="900" viewBox="0 0 1200 900" xmlns="http://www.w3.org/2000/svg">
+        <!-- Background -->
+        <rect width="1200" height="900" fill="#ffffff"/>
+        
+        <!-- NAVIGATION BAR (Minimal) -->
+        <g id="navigation">
+            <rect x="0" y="0" width="1200" height="80" fill="#ffffff" stroke="#e0e0e0" stroke-width="2"/>
+            
+            <!-- Logo -->
+            <rect x="50" y="20" width="40" height="40" fill="#2563eb" rx="5"/>
+            <text x="70" y="48" font-size="24" fill="#ffffff" font-family="Arial" text-anchor="middle">🤖</text>
+            <text x="110" y="48" font-size="22" font-weight="bold" fill="#2563eb" font-family="Arial">Code Bot</text>
+            
+            <!-- Back to Home link -->
+            <text x="1100" y="48" font-size="14" fill="#64748b" font-family="Arial" text-anchor="end">← Back to Home</text>
+        </g>
+        
+        <!-- SPLIT LAYOUT -->
+        <!-- Left Side - Branding/Info -->
+        <g id="left-side">
+            <rect x="0" y="80" width="600" height="820" fill="url(#gradient1)"/>
+            
+            <!-- Content Container -->
+            <g transform="translate(80, 250)">
+                <!-- Large Robot Icon -->
+                <circle cx="220" cy="80" r="60" fill="rgba(255,255,255,0.2)"/>
+                <text x="220" y="100" font-size="60" text-anchor="middle">🤖</text>
+                
+                <!-- Heading -->
+                <text x="220" y="200" font-size="36" font-weight="bold" fill="#ffffff" font-family="Arial" text-anchor="middle">Start Your</text>
+                <text x="220" y="240" font-size="36" font-weight="bold" fill="#ffffff" font-family="Arial" text-anchor="middle">Coding Journey</text>
+                
+                <!-- Benefits List -->
+                <g transform="translate(40, 300)">
+                    <!-- Benefit 1 -->
+                    <circle cx="0" cy="0" r="12" fill="rgba(255,255,255,0.3)"/>
+                    <text x="-3" y="5" font-size="16" fill="#ffffff" text-anchor="middle">✓</text>
+                    <text x="30" y="5" font-size="16" fill="#ffffff" font-family="Arial">150+ interactive coding challenges</text>
+                    
+                    <!-- Benefit 2 -->
+                    <circle cx="0" cy="50" r="12" fill="rgba(255,255,255,0.3)"/>
+                    <text x="-3" y="55" font-size="16" fill="#ffffff" text-anchor="middle">✓</text>
+                    <text x="30" y="55" font-size="16" fill="#ffffff" font-family="Arial">Real-time code execution</text>
+                    
+                    <!-- Benefit 3 -->
+                    <circle cx="0" cy="100" r="12" fill="rgba(255,255,255,0.3)"/>
+                    <text x="-3" y="105" font-size="16" fill="#ffffff" text-anchor="middle">✓</text>
+                    <text x="30" y="105" font-size="16" fill="#ffffff" font-family="Arial">Progress tracking & achievements</text>
+                    
+                    <!-- Benefit 4 -->
+                    <circle cx="0" cy="150" r="12" fill="rgba(255,255,255,0.3)"/>
+                    <text x="-3" y="155" font-size="16" fill="#ffffff" text-anchor="middle">✓</text>
+                    <text x="30" y="155" font-size="16" fill="#ffffff" font-family="Arial">Join 50,000+ learners</text>
+                </g>
+                
+                <!-- Decorative Code Snippet -->
+                <rect x="40" y="520" width="360" height="80" fill="rgba(30, 41, 59, 0.3)" rx="8"/>
+                <text x="60" y="545" font-size="12" fill="rgba(192, 132, 252, 0.9)" font-family="Courier New">function</text>
+                <text x="120" y="545" font-size="12" fill="rgba(96, 165, 250, 0.9)" font-family="Courier New">levelUp() {</text>
+                <text x="75" y="565" font-size="12" fill="rgba(16, 185, 129, 0.9)" font-family="Courier New">  robot.learn(</text>
+                <text x="175" y="565" font-size="12" fill="rgba(251, 191, 36, 0.9)" font-family="Courier New">'JavaScript'</text>
+                <text x="265" y="565" font-size="12" fill="rgba(16, 185, 129, 0.9)" font-family="Courier New">);</text>
+                <text x="60" y="585" font-size="12" fill="rgba(96, 165, 250, 0.9)" font-family="Courier New">}</text>
+            </g>
+        </g>
+        
+        <!-- Right Side - Authentication Form -->
+        <g id="right-side">
+            <rect x="600" y="80" width="600" height="820" fill="#ffffff"/>
+            
+            <!-- Auth Card Container -->
+            <g transform="translate(700, 250)">
+                <!-- Main Card -->
+                <rect x="0" y="0" width="400" height="450" fill="#ffffff" rx="12" stroke="#e0e0e0" stroke-width="1"/>
+                
+                <!-- Header -->
+                <text x="200" y="60" font-size="28" font-weight="bold" fill="#1e293b" font-family="Arial" text-anchor="middle">Welcome!</text>
+                <text x="200" y="95" font-size="15" fill="#64748b" font-family="Arial" text-anchor="middle">Sign in to continue your coding adventure</text>
+                
+                <!-- Divider -->
+                <line x1="40" y1="130" x2="360" y2="130" stroke="#e0e0e0" stroke-width="1"/>
+                
+                <!-- GitHub OAuth Button (Primary CTA) -->
+                <g transform="translate(50, 170)">
+                    <rect x="0" y="0" width="300" height="55" fill="#24292f" rx="8"/>
+                    <rect x="10" y="10" width="35" height="35" fill="#ffffff" rx="4"/>
+                    <!-- GitHub Icon (simplified) -->
+                    <circle cx="27.5" cy="27.5" r="13" fill="#24292f"/>
+                    <path d="M 23 22 Q 23 18 27.5 18 Q 32 18 32 22 L 32 28 Q 32 32 27.5 32 Q 23 32 23 28 Z" fill="#ffffff"/>
+                    <circle cx="25" cy="23" r="2" fill="#24292f"/>
+                    <circle cx="30" cy="23" r="2" fill="#24292f"/>
+                    
+                    <text x="150" y="33" font-size="16" font-weight="600" fill="#ffffff" font-family="Arial" text-anchor="middle">Continue with GitHub</text>
+                </g>
+                
+                <!-- Info Text -->
+                <g transform="translate(50, 260)">
+                    <text x="150" y="0" font-size="13" fill="#64748b" font-family="Arial" text-anchor="middle">By continuing, you agree to our</text>
+                    <text x="150" y="20" font-size="13" fill="#2563eb" font-family="Arial" text-anchor="middle">Terms of Service</text>
+                    <text x="150" y="20" font-size="13" fill="#64748b" font-family="Arial" text-anchor="middle" dx="78"> and </text>
+                    <text x="210" y="20" font-size="13" fill="#2563eb" font-family="Arial" text-anchor="middle">Privacy Policy</text>
+                </g>
+                
+                <!-- Why GitHub Section -->
+                <rect x="40" y="320" width="320" height="100" fill="#f8fafc" rx="8"/>
+                <text x="200" y="345" font-size="14" font-weight="600" fill="#1e293b" font-family="Arial" text-anchor="middle">Why GitHub?</text>
+                
+                <g transform="translate(60, 360)">
+                    <text x="0" y="0" font-size="12" fill="#64748b" font-family="Arial">✓ Secure authentication</text>
+                    <text x="0" y="20" font-size="12" fill="#64748b" font-family="Arial">✓ Track your code commits</text>
+                    <text x="0" y="40" font-size="12" fill="#64748b" font-family="Arial">✓ Sync your learning progress</text>
+                </g>
+            </g>
+            
+            <!-- Help Text at Bottom -->
+            <g transform="translate(700, 730)">
+                <text x="200" y="0" font-size="13" fill="#94a3b8" font-family="Arial" text-anchor="middle">Need help? Contact us at</text>
+                <text x="200" y="20" font-size="13" fill="#2563eb" font-family="Arial" text-anchor="middle">support@codebot.com</text>
+            </g>
+        </g>
+        
+        <!-- Gradient Definitions -->
+        <defs>
+            <linearGradient id="gradient1" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
+                <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1" />
+            </linearGradient>
+        </defs>
+    </svg>
+</body>
+</html>

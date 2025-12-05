@@ -1,0 +1,215 @@
+# Project Stack Rules for Cursor AI
+
+## Technology Stack
+- **Frontend**: Next.js 14+ (App Router), React 18+, TypeScript, Tailwind CSS
+- **Backend**: Next.js API Routes / Vercel Serverless Functions
+- **Database**: Supabase (PostgreSQL)
+- **External Services**: LLM APIs (OpenAI, Anthropic, etc.)
+- **Hosting**: Vercel
+- **Auth**: Supabase Auth (assumed)
+
+## Code Style & Standards
+
+### General
+- Use TypeScript for all files
+- Prefer functional components with hooks
+- Use ES6+ features (arrow functions, destructuring, async/await)
+- Follow Next.js 14 App Router conventions
+- Keep files under 300 lines; split into smaller modules if needed
+
+### Naming Conventions
+- Components: PascalCase (e.g., `UserProfile.tsx`)
+- Functions/variables: camelCase (e.g., `fetchUserData`)
+- Constants: UPPER_SNAKE_CASE (e.g., `API_BASE_URL`)
+- Files: kebab-case for utilities (e.g., `format-date.ts`)
+- Supabase tables: snake_case (e.g., `user_profiles`)
+
+### File Structure
+```
+/app                    # Next.js App Router pages
+/components            # React components
+  /ui                 # Reusable UI components
+  /features           # Feature-specific components
+/lib                   # Utility functions
+  /supabase          # Supabase client & helpers
+  /llm               # LLM integration code
+/hooks                 # Custom React hooks
+/types                 # TypeScript type definitions
+/api                   # API route handlers (if using Pages Router style)
+/app/api              # API routes in App Router
+```
+
+## Frontend Rules (Next.js/React/Tailwind)
+
+### React Best Practices
+- Use Server Components by default; add 'use client' only when needed
+- Implement proper loading states with `loading.tsx` and Suspense
+- Handle errors with `error.tsx` boundaries
+- Use React Server Actions for mutations when possible
+- Implement optimistic updates for better UX
+
+### State Management
+- Use React hooks (useState, useReducer) for local state
+- Consider Zustand or Context API for global state
+- Leverage Next.js server components to reduce client-side state
+- Use SWR or React Query for data fetching and caching
+
+### Tailwind CSS
+- Use Tailwind utility classes; avoid custom CSS when possible
+- Create reusable components for repeated patterns
+- Use `cn()` utility from `clsx` and `tailwind-merge` for conditional classes
+- Follow mobile-first approach (use `sm:`, `md:`, `lg:` breakpoints)
+- Define custom colors/spacing in `tailwind.config.ts`
+- Use Tailwind's dark mode classes with `dark:` prefix
+
+### Performance
+- Optimize images with Next.js `<Image>` component
+- Implement dynamic imports for heavy components
+- Use `next/font` for font optimization
+- Leverage Vercel's edge functions when appropriate
+- Implement proper caching strategies with `revalidate`
+
+## Backend Rules (Next.js API Routes/Vercel Functions)
+
+### API Routes
+- Keep functions small and focused (single responsibility)
+- Use proper HTTP status codes and error messages
+- Implement rate limiting for public endpoints
+- Validate all inputs with Zod or similar
+- Use middleware for authentication checks
+- Keep functions under 50MB and execution under 10s (Vercel limits)
+
+### Error Handling
+```typescript
+try {
+  // API logic
+  return Response.json({ data }, { status: 200 });
+} catch (error) {
+  console.error('Error:', error);
+  return Response.json(
+    { error: 'Internal server error' },
+    { status: 500 }
+  );
+}
+```
+
+### Environment Variables
+- Use `NEXT_PUBLIC_` prefix only for client-side vars
+- Store sensitive keys in Vercel environment variables
+- Never commit `.env.local` files
+- Use separate environments for dev/staging/production
+
+## Supabase Rules
+
+### Database
+- Use Row Level Security (RLS) policies for all tables
+- Create indexes for frequently queried columns
+- Use Supabase migrations for schema changes
+- Prefer server-side queries over client-side when handling sensitive data
+
+### Supabase Client
+```typescript
+// Server-side (can access all data)
+import { createServerClient } from '@/lib/supabase/server';
+
+// Client-side (respects RLS)
+import { createBrowserClient } from '@/lib/supabase/client';
+```
+
+### Authentication
+- Use Supabase Auth for user management
+- Implement protected routes with middleware
+- Store session in cookies (httpOnly, secure)
+- Handle token refresh automatically
+
+### Real-time
+- Use Supabase real-time subscriptions sparingly
+- Clean up subscriptions on component unmount
+- Consider polling for less time-sensitive data
+
+## LLM Integration Rules
+
+### API Usage
+- Abstract LLM calls into separate service functions
+- Implement proper error handling and retries
+- Use streaming responses for better UX
+- Cache responses when appropriate
+- Implement timeouts for LLM requests
+
+### Prompt Engineering
+- Store prompts in separate files or constants
+- Version control prompt changes
+- Use system messages to set behavior
+- Implement prompt templates with variables
+- Log prompts and responses for debugging
+
+### Cost Management
+- Set max token limits on requests
+- Implement usage tracking per user
+- Use cheaper models for simple tasks
+- Cache common responses
+- Consider rate limiting per user
+
+### Security
+- Never expose API keys to client
+- Validate and sanitize all user inputs before sending to LLMs
+- Implement content filtering for responses
+- Don't include sensitive data in prompts
+
+## Security Best Practices
+
+- Validate all inputs (use Zod schemas)
+- Sanitize user-generated content
+- Use CORS appropriately
+- Implement CSRF protection
+- Use environment variables for secrets
+- Enable Vercel's security headers
+- Implement proper authentication on all protected routes
+- Use Supabase RLS as primary security layer
+
+## Testing
+
+- Write unit tests for utility functions
+- Test API routes with integration tests
+- Use React Testing Library for component tests
+- Test Supabase queries and RLS policies
+- Mock LLM responses in tests
+
+## Deployment (Vercel)
+
+- Use preview deployments for all PRs
+- Configure environment variables in Vercel dashboard
+- Set up proper domain and DNS configuration
+- Enable automatic deployments from main branch
+- Use Vercel Analytics for monitoring
+- Configure edge functions for geo-specific routing if needed
+
+## Performance Monitoring
+
+- Use Vercel Analytics for web vitals
+- Monitor Supabase query performance
+- Track LLM API usage and costs
+- Set up error tracking (Sentry or similar)
+- Monitor API route response times
+
+## Documentation
+
+- Document all API endpoints with JSDoc
+- Maintain README with setup instructions
+- Document environment variables required
+- Keep architecture decisions documented
+- Comment complex logic and LLM prompts
+
+## AI Assistant Guidelines
+
+When helping with code:
+1. Always use TypeScript with proper types
+2. Follow the App Router patterns for Next.js 14+
+3. Use Tailwind for styling
+4. Implement proper error handling
+5. Consider Vercel's serverless function constraints
+6. Implement Supabase RLS policies
+7. Abstract LLM calls into clean service functions
+8. Optimize for performance and cost
+9. Write secure, production-ready code
+10. Suggest improvements to architecture when relevant

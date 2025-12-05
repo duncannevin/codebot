@@ -1,0 +1,50 @@
+<svg width="1200" height="600" viewBox="0 0 1200 600" xmlns="http://www.w3.org/2000/svg">
+  <!-- Gradient Background -->
+  <defs>
+    <linearGradient id="heroGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#764ba2;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#f093fb;stop-opacity:1" />
+    </linearGradient>
+    
+    <linearGradient id="gridGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ffffff;stop-opacity:0.1" />
+      <stop offset="100%" style="stop-color:#ffffff;stop-opacity:0.05" />
+    </linearGradient>
+  </defs>
+  
+  <rect width="1200" height="600" fill="url(#heroGrad)"/>
+  
+  <!-- Grid Pattern -->
+  <g opacity="0.15">
+    <line x1="0" y1="0" x2="1200" y2="0" stroke="url(#gridGrad)" stroke-width="1"/>
+    <line x1="0" y1="100" x2="1200" y2="100" stroke="url(#gridGrad)" stroke-width="1"/>
+    <line x1="0" y1="200" x2="1200" y2="200" stroke="url(#gridGrad)" stroke-width="1"/>
+    <line x1="0" y1="300" x2="1200" y2="300" stroke="url(#gridGrad)" stroke-width="1"/>
+    <line x1="0" y1="400" x2="1200" y2="400" stroke="url(#gridGrad)" stroke-width="1"/>
+    <line x1="0" y1="500" x2="1200" y2="500" stroke="url(#gridGrad)" stroke-width="1"/>
+    
+    <line x1="0" y1="0" x2="0" y2="600" stroke="url(#gridGrad)" stroke-width="1"/>
+    <line x1="200" y1="0" x2="200" y2="600" stroke="url(#gridGrad)" stroke-width="1"/>
+    <line x1="400" y1="0" x2="400" y2="600" stroke="url(#gridGrad)" stroke-width="1"/>
+    <line x1="600" y1="0" x2="600" y2="600" stroke="url(#gridGrad)" stroke-width="1"/>
+    <line x1="800" y1="0" x2="800" y2="600" stroke="url(#gridGrad)" stroke-width="1"/>
+    <line x1="1000" y1="0" x2="1000" y2="600" stroke="url(#gridGrad)" stroke-width="1"/>
+  </g>
+  
+  <!-- Floating code snippets -->
+  <g opacity="0.2">
+    <text x="100" y="120" font-family="monospace" font-size="14" fill="#ffffff">function solve() {</text>
+    <text x="150" y="450" font-family="monospace" font-size="14" fill="#ffffff">for (let i = 0...)</text>
+    <text x="900" y="180" font-family="monospace" font-size="14" fill="#ffffff">robot.moveRight();</text>
+    <text x="800" y="520" font-family="monospace" font-size="14" fill="#ffffff">if (canMove) {</text>
+    <text x="400" y="80" font-family="monospace" font-size="14" fill="#ffffff">&lt;code/&gt;</text>
+  </g>
+  
+  <!-- Decorative circles -->
+  <circle cx="100" cy="100" r="3" fill="#ffffff" opacity="0.4"/>
+  <circle cx="1100" cy="500" r="3" fill="#ffffff" opacity="0.4"/>
+  <circle cx="300" cy="500" r="2" fill="#ffffff" opacity="0.3"/>
+  <circle cx="900" cy="100" r="2" fill="#ffffff" opacity="0.3"/>
+  <circle cx="600" cy="300" r="4" fill="#ffffff" opacity="0.5"/>
+</svg>
