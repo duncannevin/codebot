@@ -78,10 +78,13 @@ solveMaze();`);
   useEffect(() => {
     const fetchLevelsAndProgress = async () => {
       try {
+        let totalLevelsCount = 10;
+        
         // Fetch levels
         const levelsResponse = await fetch('/api/levels');
         if (levelsResponse.ok) {
           const levelsData = await levelsResponse.json();
+          totalLevelsCount = levelsData.total;
           setTotalLevels(levelsData.total);
           setProgress((prev) => ({ ...prev, total: levelsData.total }));
         }
@@ -92,7 +95,7 @@ solveMaze();`);
           const progressData = await progressResponse.json();
           if (progressData.current_level && progressData.current_level > 1) {
             // User has progress, load their current level
-            const savedLevel = Math.min(progressData.current_level, levelsData?.total || 10);
+            const savedLevel = Math.min(progressData.current_level, totalLevelsCount);
             setLevel(savedLevel);
             setProgress((prev) => ({ ...prev, current: savedLevel }));
             router.push(`/game/${savedLevel}`);
@@ -104,7 +107,7 @@ solveMaze();`);
     };
 
     fetchLevelsAndProgress();
-  }, []);
+  }, [router]);
 
   useEffect(() => {
     // Initialize WebSocket connection (optional - falls back to HTTP if not available)
