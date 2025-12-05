@@ -32,64 +32,41 @@ export class CodeExecutor {
     this.reset();
     const robot = this.robot;
     
+    // Ensure speed is a valid number (in milliseconds)
+    const executionSpeed = typeof speed === 'number' && speed > 0 ? speed : 500;
+    
     // Helper to add delay between movements for real-time visualization
     const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
     
-    // Create robot API that the user code can call
+    // Queue system to ensure movements execute sequentially with delays
+    let movementQueue: Promise<boolean> = Promise.resolve(true);
+    
+    // Helper to queue a movement
+    const queueMovement = (movementFn: () => boolean, direction: string): boolean => {
+      movementQueue = movementQueue.then(async () => {
+        const moved = movementFn();
+        this.emit('robot_move', {
+          position: robot.getPosition(),
+          moves: robot.getMoves(),
+          reachedGoal: robot.hasReached(),
+          message: moved
+            ? `→ Robot moved ${direction} (${robot.getMoves()}/${this.gameState.maxMoves})`
+            : `→ Cannot move ${direction} (wall or boundary)`,
+        });
+        // Add delay for real-time visualization - use executionSpeed
+        await delay(executionSpeed);
+        return moved;
+      });
+      // Return immediately (synchronous from user's perspective)
+      return true;
+    };
+    
+    // Create robot API that the user code can call (synchronous methods with automatic delays)
     const robotAPI = {
-      moveUp: async () => {
-        const moved = robot.moveUp();
-        this.emit('robot_move', {
-          position: robot.getPosition(),
-          moves: robot.getMoves(),
-          reachedGoal: robot.hasReached(),
-          message: moved
-            ? `→ Robot moved up (${robot.getMoves()}/${this.gameState.maxMoves})`
-            : '→ Cannot move up (wall or boundary)',
-        });
-        // Add delay for real-time visualization
-        await delay(speed);
-        return moved;
-      },
-      moveDown: async () => {
-        const moved = robot.moveDown();
-        this.emit('robot_move', {
-          position: robot.getPosition(),
-          moves: robot.getMoves(),
-          reachedGoal: robot.hasReached(),
-          message: moved
-            ? `→ Robot moved down (${robot.getMoves()}/${this.gameState.maxMoves})`
-            : '→ Cannot move down (wall or boundary)',
-        });
-        await delay(speed);
-        return moved;
-      },
-      moveLeft: async () => {
-        const moved = robot.moveLeft();
-        this.emit('robot_move', {
-          position: robot.getPosition(),
-          moves: robot.getMoves(),
-          reachedGoal: robot.hasReached(),
-          message: moved
-            ? `→ Robot moved left (${robot.getMoves()}/${this.gameState.maxMoves})`
-            : '→ Cannot move left (wall or boundary)',
-        });
-        await delay(speed);
-        return moved;
-      },
-      moveRight: async () => {
-        const moved = robot.moveRight();
-        this.emit('robot_move', {
-          position: robot.getPosition(),
-          moves: robot.getMoves(),
-          reachedGoal: robot.hasReached(),
-          message: moved
-            ? `→ Robot moved right (${robot.getMoves()}/${this.gameState.maxMoves})`
-            : '→ Cannot move right (wall or boundary)',
-        });
-        await delay(speed);
-        return moved;
-      },
+      moveUp: () => queueMovement(() => robot.moveUp(), 'up'),
+      moveDown: () => queueMovement(() => robot.moveDown(), 'down'),
+      moveLeft: () => queueMovement(() => robot.moveLeft(), 'left'),
+      moveRight: () => queueMovement(() => robot.moveRight(), 'right'),
       canMove: (direction: 'up' | 'down' | 'left' | 'right') => {
         return robot.canMove(direction);
       },
@@ -99,16 +76,13 @@ export class CodeExecutor {
     };
 
     try {
-      // Wrap user code in async context
-      // User code should use await for robot movements to see real-time updates
       // Auto-call solveMaze if it's defined but not called
       let wrappedCode = code.trim();
       
-      // Check if code defines solveMaze function
+      // Check if code defines solveMaze function (with or without async)
       const hasSolveMazeDef = /(async\s+)?function\s+solveMaze\s*\(/.test(wrappedCode);
       
       // Check if solveMaze is called anywhere (excluding the definition itself)
-      // Split by lines and check each line
       const lines = wrappedCode.split('\n');
       let hasSolveMazeCall = false;
       
@@ -125,15 +99,17 @@ export class CodeExecutor {
         }
       }
       
-      // If solveMaze is defined but not called, add the call
+      // If solveMaze is defined but not called, add the call (without await)
       if (hasSolveMazeDef && !hasSolveMazeCall) {
-        wrappedCode = `${wrappedCode}\n\nawait solveMaze();`;
+        wrappedCode = `${wrappedCode}\n\nsolveMaze();`;
       }
       
-      // Wrap in async IIFE to ensure proper async execution
+      // Wrap in async IIFE to handle robot movement promises automatically
       wrappedCode = `
         (async function() {
           ${wrappedCode}
+          // Wait for all pending robot movements to complete
+          await new Promise(resolve => setTimeout(resolve, ${executionSpeed + 100}));
         })();
       `;
 
@@ -156,17 +132,16 @@ export class CodeExecutor {
             'console',
             wrappedCode
           );
-          // Execute and wait for any async operations (like robot movements with delays)
+          // Execute user code (synchronously, but movements are queued)
           const result = func(context.robot, context.console);
-          // Always wait for the result - it should be a promise from the IIFE
+          // Wait for the IIFE promise to complete
           if (result && typeof result.then === 'function') {
             await result;
-          } else {
-            // If somehow it's not a promise, wait a bit for async operations
-            await new Promise(resolve => setTimeout(resolve, 100));
           }
-          // Give a small delay to ensure all WebSocket messages are sent and processed
-          await new Promise(resolve => setTimeout(resolve, speed + 100));
+          // Wait for all queued movements to complete
+          await movementQueue;
+          // Small delay to ensure all messages are sent
+          await delay(100);
         } catch (error: any) {
           throw error;
         }

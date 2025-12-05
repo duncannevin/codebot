@@ -41,7 +41,8 @@ export function createWebSocketServer(port: number = 3001) {
           });
 
           // Execute code with speed parameter for delays between movements
-          const executionSpeed = speed || 500;
+          // Speed should be in milliseconds (e.g., 100 = fast, 1000 = slow)
+          const executionSpeed = speed || gameState?.executionSpeed || 500;
           
           try {
             const result = await executor.execute(code, executionSpeed);
