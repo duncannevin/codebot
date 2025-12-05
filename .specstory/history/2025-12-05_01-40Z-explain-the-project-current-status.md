@@ -14187,3 +14187,1089 @@ Reduced the modal background opacity from 50% to 20% so the game remains visible
 
 ---
 
+_**User (2025-12-05 02:11Z)**_
+
+Type error: Argument of type '(prev: GameState | null) => { isExecuting: false; maze?: MazeCell[][] | undefined; robot?: RobotState | undefined; goal?: Position | undefined; ... 4 more ...; executionSpeed?: number | undefined; }' is not assignable to parameter of type 'SetStateAction<GameState | null>'.
+
+  Type '(prev: GameState | null) => { isExecuting: false; maze?: MazeCell[][] | undefined; robot?: RobotState | undefined; goal?: Position | undefined; ... 4 more ...; executionSpeed?: number | undefined; }' is not assignable to type '(prevState: GameState | null) => GameState | null'.
+
+    Call signature return types '{ isExecuting: false; maze?: MazeCell[][] | undefined; robot?: RobotState | undefined; goal?: Position | undefined; start?: Position | undefined; moves?: number | undefined; maxMoves?: number | undefined; isPaused?: boolean | undefined; executionSpeed?: number | undefined; }' and 'GameState | null' are incompatible.
+
+      The types of 'maze' are incompatible between these types.
+
+        Type 'MazeCell[][] | undefined' is not assignable to type 'MazeCell[][]'.
+
+          Type 'undefined' is not assignable to type 'MazeCell[][]'.
+
+
+
+  257 |           const error = await response.json();
+
+  258 |           setConsoleOutput((prev) => [...prev, `Error: ${error.message}`]);
+
+> 259 |           setGameState((prev) => ({ ...prev, isExecuting: false }));
+
+      |                        ^
+
+  260 |           return;
+
+  261 |         }
+
+  262 |
+
+---
+
+_**Agent (model default, mode Agent)**_
+
+
+
+---
+
+
+Fixing TypeScript errors by ensuring state updates handle null and preserve all required properties:
+
+
+---
+
+<tool-use data-tool-type="search" data-tool-name="grep">
+<details>
+<summary>Tool use: **grep** • Grep for "setGameState\(\(prev\) => \(\{ \.\.\.prev" in "components/game/GameInterface.tsx" • 2 matches</summary>
+
+Output mode: content
+
+
+| File | Content | Line |
+|------|------|------|
+| `components/game/GameInterface.tsx` | `setGameState((prev) => (\{ ...prev, isExecuting: false \}));` | L259 |
+| `components/game/GameInterface.tsx` | `setGameState((prev) => (\{ ...prev, isExecuting: false \}));` | L322 |
+
+
+</details>
+</tool-use>
+
+---
+
+<tool-use data-tool-type="read" data-tool-name="read_file">
+<details><summary>Tool use: **read_file** • Read file: /Users/duncannevin/Documents/codebot/components/game/GameInterface.tsx</summary>
+
+</details>
+</tool-use>
+
+---
+
+<tool-use data-tool-type="write" data-tool-name="search_replace">
+
+<details><summary>Tool use: **search_replace** • Edit file: /Users/duncannevin/Documents/codebot/components/game/GameInterface.tsx</summary>
+
+**Chunk 1**
+Lines added: 4, lines removed: 1
+
+```diff
+@@ -257,5 +257,8 @@
+            const error = await response.json();
+            setConsoleOutput((prev) =&gt; [...prev, &#96;Error: ${error.message}&#96;]);
+-           setGameState((prev) =&gt; ({ ...prev, isExecuting: false }));
++           setGameState((prev) =&gt; {
++             if (!prev) return prev;
++             return { ...prev, isExecuting: false };
++           });
+            return;
+          }
+```
+
+</details>
+
+</tool-use>
+
+---
+
+<tool-use data-tool-type="search" data-tool-name="grep">
+<details>
+<summary>Tool use: **grep** • Grep for "setGameState\(\(prev\) => \(\{ \.\.\.prev, isExecuting: false \}\)" in "components/game/GameInterface.tsx" • 1 match</summary>
+
+Output mode: content
+
+
+| File | Content | Line |
+|------|------|------|
+| `components/game/GameInterface.tsx` | `setGameState((prev) => (\{ ...prev, isExecuting: false \}));` | L325 |
+
+
+</details>
+</tool-use>
+
+---
+
+<tool-use data-tool-type="read" data-tool-name="read_file">
+<details><summary>Tool use: **read_file** • Read file: /Users/duncannevin/Documents/codebot/components/game/GameInterface.tsx</summary>
+
+</details>
+</tool-use>
+
+---
+
+<tool-use data-tool-type="write" data-tool-name="search_replace">
+
+<details><summary>Tool use: **search_replace** • Edit file: /Users/duncannevin/Documents/codebot/components/game/GameInterface.tsx</summary>
+
+**Chunk 1**
+Lines added: 4, lines removed: 1
+
+```diff
+@@ -323,5 +323,8 @@
+      } catch (error: any) {
+        setConsoleOutput((prev) =&gt; [...prev, &#96;Error: ${error.message}&#96;]);
+-       setGameState((prev) =&gt; ({ ...prev, isExecuting: false }));
++       setGameState((prev) =&gt; {
++         if (!prev) return prev;
++         return { ...prev, isExecuting: false };
++       });
+      }
+    };
+```
+
+</details>
+
+</tool-use>
+
+---
+
+<tool-use data-tool-type="generic" data-tool-name="read_lints">
+<details>
+          <summary>Tool use: **read_lints** • Read lints for 1 file</summary>
+      
+Lint paths:
+
+- `components/game/GameInterface.tsx`
+
+Lint results
+
+
+**No lint errors found**
+</details>
+</tool-use>
+
+---
+
+
+
+---
+
+
+Fixed the TypeScript error. When updating `gameState`, TypeScript couldn't guarantee all required properties were present because `prev` could be `null`.
+
+Added null checks before updating state so TypeScript knows we're only updating when `prev` is not null and returning a complete `GameState` object.
+
+The error should be resolved. The state updates now handle the nullable `GameState` type correctly.
+
+---
+
+_**User (2025-12-05 02:11Z)**_
+
+add the logic to save the user stats in the database so that they can pick up where they left off
+
+---
+
+_**Agent (model default, mode Agent)**_
+
+
+
+---
+
+
+Adding logic to save and load user progress in the database. Checking the current setup, then creating the necessary database schema and API routes.
+
+
+---
+
+<tool-use data-tool-type="search" data-tool-name="codebase_search">
+<details>
+                <summary>Tool use: **codebase_search** • Searched codebase "How is Supabase database configured? Are there any existing database tables or migrations?" • **15** results</summary>
+            
+| File | Lines |
+|------|-------|
+| `SETUP.md` | L77 |
+| `lib/supabase/server.ts` | L28 |
+| `lib/supabase/client.ts` | L7 |
+| `.cursorrules` | L54 |
+| `middleware.ts` | L65 |
+| `.cursorrules` | L52-114 |
+| `SETUP.md` | L75-104 |
+| `package.json` | L36 |
+| `app/api/game/execute/route.ts` | L73 |
+| `GAME_SETUP.md` | L76 |
+| `app/api/levels/route.ts` | L29 |
+| `.cursorrules` | L109-181 |
+| `app/game/[levelId]/page.tsx` | L27 |
+| `lib/game/websocket-server.ts` | L91 |
+| `app/auth/callback/route.ts` | L20 |
+
+</details>
+</tool-use>
+
+---
+
+<tool-use data-tool-type="read" data-tool-name="read_file">
+<details><summary>Tool use: **read_file** • Read file: /Users/duncannevin/Documents/codebot/lib/supabase/server.ts</summary>
+
+</details>
+</tool-use>
+
+---
+
+<tool-use data-tool-type="generic" data-tool-name="list_dir">
+<details>
+            <summary>Tool use: **list_dir** • Listed directory undefined • **0** results</summary>
+        
+No results found
+</details>
+</tool-use>
+
+---
+
+<tool-use data-tool-type="write" data-tool-name="write">
+
+<details><summary>Tool use: **write** • Edit file: /Users/duncannevin/Documents/codebot/lib/db/user-progress.ts</summary>
+
+**Chunk 1**
+Lines added: 151, lines removed: 1
+
+```diff
+@@ -1,1 +1,151 @@
+- 
++ import { createClient } from '@/lib/supabase/server';
++ 
++ export interface UserProgress {
++   id?: string;
++   user_id: string;
++   current_level: number;
++   completed_levels: number[];
++   total_moves: number;
++   total_time: number;
++   best_scores: Record&lt;number, {
++     moves: number;
++     time: number;
++     completed_at: string;
++   }&gt;;
++   updated_at?: string;
++   created_at?: string;
++ }
++ 
++ export async function getUserProgress(userId: string): Promise&lt;UserProgress | null&gt; {
++   try {
++     const supabase = await createClient();
++     const { data, error } = await supabase
++       .from('user_progress')
++       .select('*')
++       .eq('user_id', userId)
++       .single();
++ 
++     if (error) {
++       if (error.code === 'PGRST116') {
++         // No rows returned - user hasn't started yet
++         return null;
++       }
++       console.error('Error fetching user progress:', error);
++       return null;
++     }
++ 
++     return data as UserProgress;
++   } catch (error) {
++     console.error('Error fetching user progress:', error);
++     return null;
++   }
++ }
++ 
++ export async function saveUserProgress(progress: UserProgress): Promise&lt;boolean&gt; {
++   try {
++     const supabase = await createClient();
++     
++     // Check if progress exists
++     const existing = await getUserProgress(progress.user_id);
++     
++     if (existing) {
++       // Update existing progress
++       const { error } = await supabase
++         .from('user_progress')
++         .update({
++           current_level: progress.current_level,
++           completed_levels: progress.completed_levels,
++           total_moves: progress.total_moves,
++           total_time: progress.total_time,
++           best_scores: progress.best_scores,
++           updated_at: new Date().toISOString(),
++         })
++         .eq('user_id', progress.user_id);
++ 
++       if (error) {
++         console.error('Error updating user progress:', error);
++         return false;
++       }
++     } else {
++       // Insert new progress
++       const { error } = await supabase
++         .from('user_progress')
++         .insert({
++           user_id: progress.user_id,
++           current_level: progress.current_level,
++           completed_levels: progress.completed_levels,
++           total_moves: progress.total_moves,
++           total_time: progress.total_time,
++           best_scores: progress.best_scores,
++         });
++ 
++       if (error) {
++         console.error('Error creating user progress:', error);
++         return false;
++       }
++     }
++ 
++     return true;
++   } catch (error) {
++     console.error('Error saving user progress:', error);
++     return false;
++   }
++ }
++ 
++ export async function updateLevelCompletion(
++   userId: string,
++   level: number,
++   moves: number,
++   time: number
++ ): Promise&lt;boolean&gt; {
++   try {
++     const currentProgress = await getUserProgress(userId);
++     
++     if (!currentProgress) {
++       // Create new progress starting from this level
++       const newProgress: UserProgress = {
++         user_id: userId,
++         current_level: level + 1,
++         completed_levels: [level],
++         total_moves: moves,
++         total_time: time,
++         best_scores: {
++           [level]: {
++             moves,
++             time,
++             completed_at: new Date().toISOString(),
++           },
++         },
++       };
++       return await saveUserProgress(newProgress);
++     }
++ 
++     // Update existing progress
++     const completedLevels = [...new Set([...currentProgress.completed_levels, level])];
++     const bestScores = { ...currentProgress.best_scores };
++     
++     // Update best score if this is better or first completion
++     if (!bestScores[level] || moves &lt; bestScores[level].moves) {
++       bestScores[level] = {
++         moves,
++         time,
++         completed_at: new Date().toISOString(),
++       };
++     }
++ 
++     const updatedProgress: UserProgress = {
++       ...currentProgress,
++       current_level: Math.max(currentProgress.current_level, level + 1),
++       completed_levels: completedLevels,
++       total_moves: currentProgress.total_moves + moves,
++       total_time: currentProgress.total_time + time,
++       best_scores: bestScores,
++     };
++ 
++     return await saveUserProgress(updatedProgress);
++   } catch (error) {
++     console.error('Error updating level completion:', error);
++     return false;
++   }
++ }
++ 
+```
+
+</details>
+
+</tool-use>
+
+---
+
+<tool-use data-tool-type="write" data-tool-name="write">
+
+<details><summary>Tool use: **write** • Edit file: /Users/duncannevin/Documents/codebot/app/api/user/progress/route.ts</summary>
+
+**Chunk 1**
+Lines added: 78, lines removed: 1
+
+```diff
+@@ -1,1 +1,78 @@
+- 
++ import { NextRequest, NextResponse } from 'next/server';
++ import { createClient } from '@/lib/supabase/server';
++ import { getUserProgress, saveUserProgress, UserProgress } from '@/lib/db/user-progress';
++ 
++ export async function GET(request: NextRequest) {
++   try {
++     const supabase = await createClient();
++     const {
++       data: { user },
++     } = await supabase.auth.getUser();
++ 
++     if (!user) {
++       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
++     }
++ 
++     const progress = await getUserProgress(user.id);
++ 
++     if (!progress) {
++       // Return default progress for new users
++       return NextResponse.json({
++         current_level: 1,
++         completed_levels: [],
++         total_moves: 0,
++         total_time: 0,
++         best_scores: {},
++       });
++     }
++ 
++     return NextResponse.json(progress);
++   } catch (error: any) {
++     console.error('Error fetching user progress:', error);
++     return NextResponse.json(
++       { error: 'Internal server error' },
++       { status: 500 }
++     );
++   }
++ }
++ 
++ export async function POST(request: NextRequest) {
++   try {
++     const supabase = await createClient();
++     const {
++       data: { user },
++     } = await supabase.auth.getUser();
++ 
++     if (!user) {
++       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
++     }
++ 
++     const body = await request.json();
++     const progress: UserProgress = {
++       user_id: user.id,
++       current_level: body.current_level || 1,
++       completed_levels: body.completed_levels || [],
++       total_moves: body.total_moves || 0,
++       total_time: body.total_time || 0,
++       best_scores: body.best_scores || {},
++     };
++ 
++     const success = await saveUserProgress(progress);
++ 
++     if (!success) {
++       return NextResponse.json(
++         { error: 'Failed to save progress' },
++         { status: 500 }
++       );
++     }
++ 
++     return NextResponse.json({ success: true });
++   } catch (error: any) {
++     console.error('Error saving user progress:', error);
++     return NextResponse.json(
++       { error: 'Internal server error' },
++       { status: 500 }
++     );
++   }
++ }
++ 
+```
+
+</details>
+
+</tool-use>
+
+---
+
+<tool-use data-tool-type="write" data-tool-name="write">
+
+<details><summary>Tool use: **write** • Edit file: /Users/duncannevin/Documents/codebot/app/api/user/progress/complete/route.ts</summary>
+
+**Chunk 1**
+Lines added: 44, lines removed: 1
+
+```diff
+@@ -1,1 +1,44 @@
+- 
++ import { NextRequest, NextResponse } from 'next/server';
++ import { createClient } from '@/lib/supabase/server';
++ import { updateLevelCompletion } from '@/lib/db/user-progress';
++ 
++ export async function POST(request: NextRequest) {
++   try {
++     const supabase = await createClient();
++     const {
++       data: { user },
++     } = await supabase.auth.getUser();
++ 
++     if (!user) {
++       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
++     }
++ 
++     const body = await request.json();
++     const { level, moves, time } = body;
++ 
++     if (typeof level !== 'number' || typeof moves !== 'number' || typeof time !== 'number') {
++       return NextResponse.json(
++         { error: 'Invalid parameters' },
++         { status: 400 }
++       );
++     }
++ 
++     const success = await updateLevelCompletion(user.id, level, moves, time);
++ 
++     if (!success) {
++       return NextResponse.json(
++         { error: 'Failed to update progress' },
++         { status: 500 }
++       );
++     }
++ 
++     return NextResponse.json({ success: true });
++   } catch (error: any) {
++     console.error('Error updating level completion:', error);
++     return NextResponse.json(
++       { error: 'Internal server error' },
++       { status: 500 }
++     );
++   }
++ }
++ 
+```
+
+</details>
+
+</tool-use>
+
+---
+
+<tool-use data-tool-type="write" data-tool-name="write">
+
+<details><summary>Tool use: **write** • Edit file: /Users/duncannevin/Documents/codebot/supabase/migrations/001_create_user_progress.sql</summary>
+
+**Chunk 1**
+Lines added: 54, lines removed: 1
+
+```diff
+@@ -1,1 +1,54 @@
+- 
++ -- Create user_progress table to track user game progress
++ CREATE TABLE IF NOT EXISTS user_progress (
++   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
++   user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
++   current_level INTEGER NOT NULL DEFAULT 1,
++   completed_levels INTEGER[] DEFAULT ARRAY[]::INTEGER[],
++   total_moves INTEGER NOT NULL DEFAULT 0,
++   total_time INTEGER NOT NULL DEFAULT 0, -- in seconds
++   best_scores JSONB DEFAULT '{}'::jsonb,
++   created_at TIMESTAMPTZ DEFAULT NOW(),
++   updated_at TIMESTAMPTZ DEFAULT NOW(),
++   UNIQUE(user_id)
++ );
++ 
++ -- Create index on user_id for faster lookups
++ CREATE INDEX IF NOT EXISTS idx_user_progress_user_id ON user_progress(user_id);
++ 
++ -- Enable Row Level Security
++ ALTER TABLE user_progress ENABLE ROW LEVEL SECURITY;
++ 
++ -- Create policy: Users can only read their own progress
++ CREATE POLICY "Users can view own progress"
++   ON user_progress
++   FOR SELECT
++   USING (auth.uid() = user_id);
++ 
++ -- Create policy: Users can insert their own progress
++ CREATE POLICY "Users can insert own progress"
++   ON user_progress
++   FOR INSERT
++   WITH CHECK (auth.uid() = user_id);
++ 
++ -- Create policy: Users can update their own progress
++ CREATE POLICY "Users can update own progress"
++   ON user_progress
++   FOR UPDATE
++   USING (auth.uid() = user_id)
++   WITH CHECK (auth.uid() = user_id);
++ 
++ -- Create function to update updated_at timestamp
++ CREATE OR REPLACE FUNCTION update_updated_at_column()
++ RETURNS TRIGGER AS $$
++ BEGIN
++   NEW.updated_at = NOW();
++   RETURN NEW;
++ END;
++ $$ LANGUAGE plpgsql;
++ 
++ -- Create trigger to automatically update updated_at
++ CREATE TRIGGER update_user_progress_updated_at
++   BEFORE UPDATE ON user_progress
++   FOR EACH ROW
++   EXECUTE FUNCTION update_updated_at_column();
++ 
+```
+
+</details>
+
+</tool-use>
+
+---
+
+<tool-use data-tool-type="read" data-tool-name="read_file">
+<details><summary>Tool use: **read_file** • Read file: /Users/duncannevin/Documents/codebot/components/game/GameInterface.tsx</summary>
+
+</details>
+</tool-use>
+
+---
+
+<tool-use data-tool-type="read" data-tool-name="read_file">
+<details><summary>Tool use: **read_file** • Read file: /Users/duncannevin/Documents/codebot/components/game/GameInterface.tsx</summary>
+
+</details>
+</tool-use>
+
+---
+
+<tool-use data-tool-type="write" data-tool-name="search_replace">
+
+<details><summary>Tool use: **search_replace** • Edit file: /Users/duncannevin/Documents/codebot/components/game/GameInterface.tsx</summary>
+
+**Chunk 1**
+Lines added: 1, lines removed: undefined
+
+```diff
+@@ -41,4 +41,5 @@
+    const [showWinModal, setShowWinModal] = useState(false);
+    const [hasShownWinModal, setHasShownWinModal] = useState(false);
++   const [startTime, setStartTime] = useState&lt;number | null&gt;(null);
+    const wsRef = useRef&lt;WebSocket | null&gt;(null);
+  
+```
+
+</details>
+
+</tool-use>
+
+---
+
+<tool-use data-tool-type="write" data-tool-name="search_replace">
+
+<details><summary>Tool use: **search_replace** • Edit file: /Users/duncannevin/Documents/codebot/components/game/GameInterface.tsx</summary>
+
+**Chunk 1**
+Lines added: 23, lines removed: 9
+
+```diff
+@@ -74,20 +74,34 @@
+    }, [level]);
+  
+-   // Fetch total levels count
++   // Fetch total levels count and user progress
+    useEffect(() =&gt; {
+-     const fetchLevels = async () =&gt; {
++     const fetchLevelsAndProgress = async () =&gt; {
+        try {
+-         const response = await fetch('/api/levels');
+-         if (response.ok) {
+-           const data = await response.json();
+-           setTotalLevels(data.total);
+-           setProgress((prev) =&gt; ({ ...prev, total: data.total }));
++         // Fetch levels
++         const levelsResponse = await fetch('/api/levels');
++         if (levelsResponse.ok) {
++           const levelsData = await levelsResponse.json();
++           setTotalLevels(levelsData.total);
++           setProgress((prev) =&gt; ({ ...prev, total: levelsData.total }));
++         }
++ 
++         // Fetch user progress
++         const progressResponse = await fetch('/api/user/progress');
++         if (progressResponse.ok) {
++           const progressData = await progressResponse.json();
++           if (progressData.current_level &amp;&amp; progressData.current_level &gt; 1) {
++             // User has progress, load their current level
++             const savedLevel = Math.min(progressData.current_level, levelsData?.total || 10);
++             setLevel(savedLevel);
++             setProgress((prev) =&gt; ({ ...prev, current: savedLevel }));
++             router.push(&#96;/game/${savedLevel}&#96;);
++           }
+          }
+        } catch (error) {
+-         console.error('Error fetching levels:', error);
++         console.error('Error fetching levels/progress:', error);
+        }
+      };
+  
+-     fetchLevels();
++     fetchLevelsAndProgress();
+    }, []);
+  
+```
+
+</details>
+
+</tool-use>
+
+---
+
+<tool-use data-tool-type="write" data-tool-name="search_replace">
+
+<details><summary>Tool use: **search_replace** • Edit file: /Users/duncannevin/Documents/codebot/components/game/GameInterface.tsx</summary>
+
+**Chunk 1**
+Lines added: 3, lines removed: undefined
+
+```diff
+@@ -230,4 +230,7 @@
+    const handleRunCode = async () =&gt; {
+      if (!gameState) return;
++ 
++     // Start timer for this attempt
++     setStartTime(Date.now());
+  
+      setGameState((prev) =&gt; {
+```
+
+</details>
+
+</tool-use>
+
+---
+
+<tool-use data-tool-type="write" data-tool-name="search_replace">
+
+<details><summary>Tool use: **search_replace** • Edit file: /Users/duncannevin/Documents/codebot/components/game/GameInterface.tsx</summary>
+
+**Chunk 1**
+Lines added: 18, lines removed: 1
+
+```diff
+@@ -387,6 +387,23 @@
+    };
+  
+-   const handleNextLevel = () =&gt; {
++   const handleNextLevel = async () =&gt; {
+      if (level &lt; totalLevels) {
++       // Save progress before moving to next level
++       if (gameState &amp;&amp; startTime) {
++         const timeElapsed = Math.floor((Date.now() - startTime) / 1000); // in seconds
++         try {
++           await fetch('/api/user/progress/complete', {
++             method: 'POST',
++             headers: { 'Content-Type': 'application/json' },
++             body: JSON.stringify({
++               level,
++               moves: gameState.moves,
++               time: timeElapsed,
++             }),
++           });
++         } catch (error) {
++           console.error('Error saving progress:', error);
++         }
++       }
+        handleLevelChange(level + 1);
+      }
+```
+
+</details>
+
+</tool-use>
+
+---
+
+<tool-use data-tool-type="write" data-tool-name="search_replace">
+
+<details><summary>Tool use: **search_replace** • Edit file: /Users/duncannevin/Documents/codebot/components/game/GameInterface.tsx</summary>
+
+**Chunk 1**
+Lines added: 15, lines removed: undefined
+
+```diff
+@@ -160,4 +160,19 @@
+                  setShowWinModal(true);
+                  setHasShownWinModal(true);
++                 // Save progress when level is completed
++                 if (gameState &amp;&amp; startTime) {
++                   const timeElapsed = Math.floor((Date.now() - startTime) / 1000);
++                   fetch('/api/user/progress/complete', {
++                     method: 'POST',
++                     headers: { 'Content-Type': 'application/json' },
++                     body: JSON.stringify({
++                       level,
++                       moves: gameState.moves,
++                       time: timeElapsed,
++                     }),
++                   }).catch((error) =&gt; {
++                     console.error('Error saving progress:', error);
++                   });
++                 }
+                }
+              } else if (data.type === 'execution_complete') {
+```
+
+</details>
+
+</tool-use>
+
+---
+
+<tool-use data-tool-type="write" data-tool-name="search_replace">
+
+<details><summary>Tool use: **search_replace** • Edit file: /Users/duncannevin/Documents/codebot/components/game/GameInterface.tsx</summary>
+
+**Chunk 1**
+Lines added: 15, lines removed: undefined
+
+```diff
+@@ -346,4 +346,19 @@
+              setShowWinModal(true);
+              setHasShownWinModal(true);
++             // Save progress when level is completed
++             if (gameState &amp;&amp; startTime) {
++               const timeElapsed = Math.floor((Date.now() - startTime) / 1000);
++               fetch('/api/user/progress/complete', {
++                 method: 'POST',
++                 headers: { 'Content-Type': 'application/json' },
++                 body: JSON.stringify({
++                   level,
++                   moves: gameState.moves,
++                   time: timeElapsed,
++                 }),
++               }).catch((error) =&gt; {
++                 console.error('Error saving progress:', error);
++               });
++             }
+            }
+          } else {
+```
+
+</details>
+
+</tool-use>
+
+---
+
+The string to replace was not found in the file.
+
+---
+
+<tool-use data-tool-type="generic" data-tool-name="read_lints">
+<details>
+          <summary>Tool use: **read_lints** • Read lints for 3 files</summary>
+      
+Lint paths:
+
+- `lib/db`
+- `app/api/user`
+- `components/game/GameInterface.tsx`
+
+Lint results
+
+
+**No lint errors found**
+</details>
+</tool-use>
+
+---
+
+
+
+---
+
+
+Fixing the remaining issue and creating a setup guide:
+
+
+---
+
+<tool-use data-tool-type="read" data-tool-name="read_file">
+<details><summary>Tool use: **read_file** • Read file: /Users/duncannevin/Documents/codebot/components/game/GameInterface.tsx</summary>
+
+</details>
+</tool-use>
+
+---
+
+<tool-use data-tool-type="write" data-tool-name="search_replace">
+
+<details><summary>Tool use: **search_replace** • Edit file: /Users/duncannevin/Documents/codebot/components/game/GameInterface.tsx</summary>
+
+**Chunk 1**
+Lines added: 1, lines removed: undefined
+
+```diff
+@@ -64,4 +64,5 @@
+          setShowWinModal(false);
+          setHasShownWinModal(false);
++         setStartTime(null);
+        } catch (error) {
+          console.error('Error loading level:', error);
+```
+
+</details>
+
+</tool-use>
+
+---
+
+<tool-use data-tool-type="write" data-tool-name="write">
+
+<details><summary>Tool use: **write** • Edit file: /Users/duncannevin/Documents/codebot/DATABASE_SETUP.md</summary>
+
+**Chunk 1**
+Lines added: 67, lines removed: 1
+
+```diff
+@@ -1,1 +1,67 @@
+- 
++ # Database Setup for User Progress
++ 
++ This guide explains how to set up the database table for tracking user progress.
++ 
++ ## Step 1: Run the Migration in Supabase
++ 
++ 1. Go to your Supabase project dashboard
++ 2. Navigate to **SQL Editor**
++ 3. Copy the contents of &#96;supabase/migrations/001_create_user_progress.sql&#96;
++ 4. Paste it into the SQL Editor
++ 5. Click **Run** to execute the migration
++ 
++ Alternatively, you can use the Supabase CLI:
++ 
++ &#96;&#96;&#96;bash
++ # If you have Supabase CLI installed
++ supabase db push
++ &#96;&#96;&#96;
++ 
++ ## Step 2: Verify the Table
++ 
++ After running the migration, verify the table was created:
++ 
++ 1. Go to **Table Editor** in your Supabase dashboard
++ 2. You should see a &#96;user_progress&#96; table with the following columns:
++    - &#96;id&#96; (UUID, primary key)
++    - &#96;user_id&#96; (UUID, foreign key to auth.users)
++    - &#96;current_level&#96; (INTEGER)
++    - &#96;completed_levels&#96; (INTEGER array)
++    - &#96;total_moves&#96; (INTEGER)
++    - &#96;total_time&#96; (INTEGER, in seconds)
++    - &#96;best_scores&#96; (JSONB)
++    - &#96;created_at&#96; (TIMESTAMPTZ)
++    - &#96;updated_at&#96; (TIMESTAMPTZ)
++ 
++ ## Step 3: Verify Row Level Security (RLS)
++ 
++ The migration automatically sets up RLS policies so users can only access their own progress:
++ 
++ - Users can view their own progress
++ - Users can insert their own progress
++ - Users can update their own progress
++ 
++ You can verify this in **Authentication** &gt; **Policies** in your Supabase dashboard.
++ 
++ ## What Gets Saved
++ 
++ The system automatically saves:
++ - **Current level**: The highest level the user has reached
++ - **Completed levels**: Array of all levels the user has completed
++ - **Best scores**: Best moves and time for each completed level
++ - **Total moves**: Cumulative moves across all levels
++ - **Total time**: Cumulative time across all levels
++ 
++ ## API Endpoints
++ 
++ - &#96;GET /api/user/progress&#96; - Get user's current progress
++ - &#96;POST /api/user/progress&#96; - Save user's progress (manual)
++ - &#96;POST /api/user/progress/complete&#96; - Update progress when a level is completed
++ 
++ Progress is automatically saved when:
++ - A user completes a level (reaches the goal)
++ - A user clicks "Next Level" in the win modal
++ 
++ Progress is automatically loaded when:
++ - A user logs in and navigates to the game
++ 
+```
+
+</details>
+
+</tool-use>
+
+---
+
+<tool-use data-tool-type="generic" data-tool-name="read_lints">
+<details>
+          <summary>Tool use: **read_lints** • Read lints for 2 files</summary>
+      
+Lint paths:
+
+- `lib/db`
+- `app/api/user`
+
+Lint results
+
+
+**No lint errors found**
+</details>
+</tool-use>
+
+---
+
+
+
+---
+
+
+Added database logic to save and load user progress. Summary:
+
+## What was added
+
+1. **Database schema** (`supabase/migrations/001_create_user_progress.sql`):
+   - `user_progress` table with RLS policies
+   - Tracks current level, completed levels, best scores, total moves, and total time
+
+2. **Database functions** (`lib/db/user-progress.ts`):
+   - `getUserProgress()` - Fetch user's progress
+   - `saveUserProgress()` - Save/update user progress
+   - `updateLevelCompletion()` - Update progress when a level is completed
+
+3. **API routes**:
+   - `GET /api/user/progress` - Get user's current progress
+   - `POST /api/user/progress` - Save user's progress
+   - `POST /api/user/progress/complete` - Update progress when level is completed
+
+4. **Game interface updates**:
+   - Loads user progress on mount and navigates to their current level
+   - Tracks time spent on each level attempt
+   - Saves progress when a level is completed
+   - Saves progress when clicking "Next Level"
+
+5. **Setup documentation** (`DATABASE_SETUP.md`):
+   - Instructions for running the migration in Supabase
+
+## Next steps
+
+1. Run the migration in your Supabase dashboard:
+   - Go to SQL Editor
+   - Copy and run the contents of `supabase/migrations/001_create_user_progress.sql`
+
+2. Test the functionality:
+   - Complete a level and verify progress is saved
+   - Log out and log back in to verify progress is restored
+
+The system saves progress when levels are completed and restores it when users return, so they can pick up where they left off.
+
+---
+

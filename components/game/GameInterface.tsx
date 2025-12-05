@@ -40,6 +40,7 @@ export default function GameInterface({ user, initialLevel }: GameInterfaceProps
   const [loading, setLoading] = useState(true);
   const [showWinModal, setShowWinModal] = useState(false);
   const [hasShownWinModal, setHasShownWinModal] = useState(false);
+  const [startTime, setStartTime] = useState<number | null>(null);
   const wsRef = useRef<WebSocket | null>(null);
 
   // Fetch level data
@@ -62,6 +63,7 @@ solveMaze();`);
         setConsoleOutput([]);
         setShowWinModal(false);
         setHasShownWinModal(false);
+        setStartTime(null);
       } catch (error) {
         console.error('Error loading level:', error);
       } finally {
@@ -72,22 +74,36 @@ solveMaze();`);
     fetchLevel();
   }, [level]);
 
-  // Fetch total levels count
+  // Fetch total levels count and user progress
   useEffect(() => {
-    const fetchLevels = async () => {
+    const fetchLevelsAndProgress = async () => {
       try {
-        const response = await fetch('/api/levels');
-        if (response.ok) {
-          const data = await response.json();
-          setTotalLevels(data.total);
-          setProgress((prev) => ({ ...prev, total: data.total }));
+        // Fetch levels
+        const levelsResponse = await fetch('/api/levels');
+        if (levelsResponse.ok) {
+          const levelsData = await levelsResponse.json();
+          setTotalLevels(levelsData.total);
+          setProgress((prev) => ({ ...prev, total: levelsData.total }));
+        }
+
+        // Fetch user progress
+        const progressResponse = await fetch('/api/user/progress');
+        if (progressResponse.ok) {
+          const progressData = await progressResponse.json();
+          if (progressData.current_level && progressData.current_level > 1) {
+            // User has progress, load their current level
+            const savedLevel = Math.min(progressData.current_level, levelsData?.total || 10);
+            setLevel(savedLevel);
+            setProgress((prev) => ({ ...prev, current: savedLevel }));
+            router.push(`/game/${savedLevel}`);
+          }
         }
       } catch (error) {
-        console.error('Error fetching levels:', error);
+        console.error('Error fetching levels/progress:', error);
       }
     };
 
-    fetchLevels();
+    fetchLevelsAndProgress();
   }, []);
 
   useEffect(() => {
@@ -144,6 +160,21 @@ solveMaze();`);
               if (data.reachedGoal && !hasShownWinModal) {
                 setShowWinModal(true);
                 setHasShownWinModal(true);
+                // Save progress when level is completed
+                if (gameState && startTime) {
+                  const timeElapsed = Math.floor((Date.now() - startTime) / 1000);
+                  fetch('/api/user/progress/complete', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      level,
+                      moves: gameState.moves,
+                      time: timeElapsed,
+                    }),
+                  }).catch((error) => {
+                    console.error('Error saving progress:', error);
+                  });
+                }
               }
             } else if (data.type === 'execution_complete') {
               setGameState((prev) => {
@@ -214,6 +245,9 @@ solveMaze();`);
 
   const handleRunCode = async () => {
     if (!gameState) return;
+
+    // Start timer for this attempt
+    setStartTime(Date.now());
 
     setGameState((prev) => {
       if (!prev) return prev;
@@ -312,6 +346,21 @@ solveMaze();`);
           if (data.result.reachedGoal && !hasShownWinModal) {
             setShowWinModal(true);
             setHasShownWinModal(true);
+            // Save progress when level is completed
+            if (gameState && startTime) {
+              const timeElapsed = Math.floor((Date.now() - startTime) / 1000);
+              fetch('/api/user/progress/complete', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  level,
+                  moves: gameState.moves,
+                  time: timeElapsed,
+                }),
+              }).catch((error) => {
+                console.error('Error saving progress:', error);
+              });
+            }
           }
         } else {
           setGameState((prev) => {
@@ -368,8 +417,25 @@ solveMaze();`);
     }
   };
 
-  const handleNextLevel = () => {
+  const handleNextLevel = async () => {
     if (level < totalLevels) {
+      // Save progress before moving to next level
+      if (gameState && startTime) {
+        const timeElapsed = Math.floor((Date.now() - startTime) / 1000); // in seconds
+        try {
+          await fetch('/api/user/progress/complete', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              level,
+              moves: gameState.moves,
+              time: timeElapsed,
+            }),
+          });
+        } catch (error) {
+          console.error('Error saving progress:', error);
+        }
+      }
       handleLevelChange(level + 1);
     }
   };
