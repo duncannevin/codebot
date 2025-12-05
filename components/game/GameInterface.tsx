@@ -37,6 +37,7 @@ export default function GameInterface({ user, initialLevel }: GameInterfaceProps
   const [consoleOutput, setConsoleOutput] = useState<string[]>([]);
   const [totalLevels, setTotalLevels] = useState(10);
   const [progress, setProgress] = useState({ current: 1, total: 10 });
+  const [maxUnlockedLevel, setMaxUnlockedLevel] = useState(1);
   const [loading, setLoading] = useState(true);
   const [showWinModal, setShowWinModal] = useState(false);
   const [hasShownWinModal, setHasShownWinModal] = useState(false);
@@ -50,6 +51,11 @@ export default function GameInterface({ user, initialLevel }: GameInterfaceProps
         setLoading(true);
         const response = await fetch(`/api/levels/${level}`);
         if (!response.ok) {
+          if (response.status === 403) {
+            // Level is locked, redirect to max unlocked level
+            router.push(`/game/${maxUnlockedLevel}`);
+            return;
+          }
           throw new Error('Failed to load level');
         }
         const data: LevelData = await response.json();
@@ -72,7 +78,7 @@ solveMaze();`);
     };
 
     fetchLevel();
-  }, [level]);
+  }, [level, maxUnlockedLevel, router]);
 
   // Fetch total levels count and user progress
   useEffect(() => {
@@ -93,12 +99,16 @@ solveMaze();`);
         const progressResponse = await fetch('/api/user/progress');
         if (progressResponse.ok) {
           const progressData = await progressResponse.json();
-          if (progressData.current_level && progressData.current_level > 1) {
-            // User has progress, load their current level
-            const savedLevel = Math.min(progressData.current_level, totalLevelsCount);
-            setLevel(savedLevel);
-            setProgress((prev) => ({ ...prev, current: savedLevel }));
-            router.push(`/game/${savedLevel}`);
+          const userCurrentLevel = progressData.current_level || 1;
+          setMaxUnlockedLevel(userCurrentLevel);
+          
+          // Update progress state with current level from URL or initial level
+          const currentUrlLevel = parseInt(params?.levelId as string) || initialLevel || 1;
+          // Only update if the level is valid (server-side redirect will handle locked levels)
+          if (currentUrlLevel >= 1 && currentUrlLevel <= userCurrentLevel) {
+            setProgress((prev) => ({ ...prev, current: currentUrlLevel }));
+          } else {
+            setProgress((prev) => ({ ...prev, current: userCurrentLevel }));
           }
         }
       } catch (error) {
@@ -410,13 +420,17 @@ solveMaze();`);
   };
 
   const handleLevelChange = (newLevel: number) => {
-    if (newLevel >= 1 && newLevel <= totalLevels) {
+    // Users can only access levels up to their current unlocked level
+    if (newLevel >= 1 && newLevel <= totalLevels && newLevel <= maxUnlockedLevel) {
       setLevel(newLevel);
       setProgress((prev) => ({ ...prev, current: newLevel }));
       setShowWinModal(false);
       setHasShownWinModal(false);
       // Update URL without page reload
       router.push(`/game/${newLevel}`);
+    } else if (newLevel > maxUnlockedLevel) {
+      // Prevent navigation to locked levels
+      console.warn(`Level ${newLevel} is not yet unlocked. Complete previous levels first.`);
     }
   };
 
@@ -426,7 +440,7 @@ solveMaze();`);
       if (gameState && startTime) {
         const timeElapsed = Math.floor((Date.now() - startTime) / 1000); // in seconds
         try {
-          await fetch('/api/user/progress/complete', {
+          const response = await fetch('/api/user/progress/complete', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -435,6 +449,14 @@ solveMaze();`);
               time: timeElapsed,
             }),
           });
+          
+          if (response.ok) {
+            // Update max unlocked level after completing a level
+            const progressData = await fetch('/api/user/progress').then(res => res.json());
+            if (progressData.current_level) {
+              setMaxUnlockedLevel(progressData.current_level);
+            }
+          }
         } catch (error) {
           console.error('Error saving progress:', error);
         }
@@ -451,11 +473,17 @@ solveMaze();`);
   useEffect(() => {
     const urlLevel = parseInt(params?.levelId as string);
     if (!isNaN(urlLevel) && urlLevel >= 1 && urlLevel !== level) {
-      setLevel(urlLevel);
-      setProgress((prev) => ({ ...prev, current: urlLevel }));
+      // Only allow syncing to levels that are unlocked
+      if (urlLevel <= maxUnlockedLevel) {
+        setLevel(urlLevel);
+        setProgress((prev) => ({ ...prev, current: urlLevel }));
+      } else {
+        // Redirect to max unlocked level if trying to access locked level
+        router.push(`/game/${maxUnlockedLevel}`);
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [params?.levelId]);
+  }, [params?.levelId, maxUnlockedLevel]);
 
   if (loading || !gameState || !levelData) {
     return (
@@ -699,7 +727,7 @@ solveMaze();`);
                 </button>
                 <button
                   onClick={() => handleLevelChange(level + 1)}
-                  disabled={level >= totalLevels}
+                  disabled={level >= totalLevels || level + 1 > maxUnlockedLevel}
                   className="ml-auto rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-blue-700"
                 >
                   Next Level →
@@ -735,7 +763,14 @@ solveMaze();`);
                 >
                   Stay on Level
                 </button>
-                {level < totalLevels ? (
+                {level >= totalLevels ? (
+                  <button
+                    onClick={handleStayOnLevel}
+                    className="flex-1 rounded-lg bg-green-600 px-6 py-3 font-semibold text-white hover:bg-green-700"
+                  >
+                    All Levels Complete! 🎊
+                  </button>
+                ) : level <= maxUnlockedLevel ? (
                   <button
                     onClick={handleNextLevel}
                     className="flex-1 rounded-lg bg-blue-600 px-6 py-3 font-semibold text-white hover:bg-blue-700"
@@ -745,9 +780,10 @@ solveMaze();`);
                 ) : (
                   <button
                     onClick={handleStayOnLevel}
-                    className="flex-1 rounded-lg bg-green-600 px-6 py-3 font-semibold text-white hover:bg-green-700"
+                    disabled
+                    className="flex-1 rounded-lg bg-gray-400 px-6 py-3 font-semibold text-white opacity-50 cursor-not-allowed"
                   >
-                    All Levels Complete! 🎊
+                    Next Level Locked
                   </button>
                 )}
               </div>

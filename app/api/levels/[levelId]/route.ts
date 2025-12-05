@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { loadLevel, getAvailableLevels } from '@/lib/game/level-parser';
+import { getUserProgress } from '@/lib/db/user-progress';
 
 export async function GET(
   request: NextRequest,
@@ -24,6 +25,18 @@ export async function GET(
       return NextResponse.json(
         { error: 'Invalid level number' },
         { status: 400 }
+      );
+    }
+
+    // Check user progress to ensure they can access this level
+    const progress = await getUserProgress(user.id);
+    const currentLevel = progress?.current_level || 1;
+
+    // Users can only access levels up to their current level
+    if (levelNumber > currentLevel) {
+      return NextResponse.json(
+        { error: 'Level not yet unlocked. Complete previous levels to unlock this level.' },
+        { status: 403 }
       );
     }
 
