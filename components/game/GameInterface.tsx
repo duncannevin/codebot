@@ -256,7 +256,10 @@ solveMaze();`);
         if (!response.ok) {
           const error = await response.json();
           setConsoleOutput((prev) => [...prev, `Error: ${error.message}`]);
-          setGameState((prev) => ({ ...prev, isExecuting: false }));
+          setGameState((prev) => {
+            if (!prev) return prev;
+            return { ...prev, isExecuting: false };
+          });
           return;
         }
 
@@ -319,7 +322,10 @@ solveMaze();`);
       }
     } catch (error: any) {
       setConsoleOutput((prev) => [...prev, `Error: ${error.message}`]);
-      setGameState((prev) => ({ ...prev, isExecuting: false }));
+      setGameState((prev) => {
+        if (!prev) return prev;
+        return { ...prev, isExecuting: false };
+      });
     }
   };
 
