@@ -1202,3 +1202,1391 @@ This prevents navigation to locked levels and provides clear visual feedback.
 
 ---
 
+_**User (2025-12-05 20:18Z)**_
+
+save the users stats to the database so that these stats are re-populated whenever a user visits a level
+
+---
+
+_**Agent (model default, mode Agent)**_
+
+
+
+---
+
+
+Examining the current implementation to persist user stats per level.
+
+
+---
+
+<tool-use data-tool-type="read" data-tool-name="read_file">
+<details><summary>Tool use: **read_file** • Read file: lib/db/user-progress.ts</summary>
+
+</details>
+</tool-use>
+
+---
+
+<tool-use data-tool-type="read" data-tool-name="read_file">
+<details><summary>Tool use: **read_file** • Read file: components/game/GameStats.tsx</summary>
+
+</details>
+</tool-use>
+
+---
+
+<tool-use data-tool-type="search" data-tool-name="grep">
+<details>
+<summary>Tool use: **grep** • Grep for "moves|time|attempts|best.*score" in "components/game/GameInterface.tsx" • 33 matches</summary>
+
+Output mode: content
+
+
+| File | Content | Line |
+|------|------|------|
+| `components/game/GameInterface.tsx` | `const [startTime, setStartTime] = useState<number \| null>(null);` | L44 |
+| `components/game/GameInterface.tsx` | `setStartTime(null);` | L72 |
+| `components/game/GameInterface.tsx` | `let connectionTimeout: NodeJS.Timeout;` | L125 |
+| `components/game/GameInterface.tsx` | `// Set a timeout for connection` | L139 |
+| `components/game/GameInterface.tsx` | `connectionTimeout = setTimeout(() => \{` | L140 |
+| `components/game/GameInterface.tsx` | `console.warn('[WebSocket Client] Connection timeout, will use HTTP fallback');` | L142 |
+| `components/game/GameInterface.tsx` | `\}, 3000); // 3 second timeout` | L146 |
+| `components/game/GameInterface.tsx` | `clearTimeout(connectionTimeout);` | L149 |
+| `components/game/GameInterface.tsx` | `moves: data.moves,` | L168 |
+| `components/game/GameInterface.tsx` | `if (gameState && startTime) \{` | L177 |
+| `components/game/GameInterface.tsx` | `const timeElapsed = Math.floor((Date.now() - startTime) / 1000);` | L178 |
+| `components/game/GameInterface.tsx` | `moves: gameState.moves,` | L184 |
+| `components/game/GameInterface.tsx` | `time: timeElapsed,` | L185 |
+| `components/game/GameInterface.tsx` | `clearTimeout(connectionTimeout);` | L225 |
+| `components/game/GameInterface.tsx` | `clearTimeout(connectionTimeout);` | L231 |
+| `components/game/GameInterface.tsx` | `clearTimeout(connectionTimeout);` | L240 |
+| `components/game/GameInterface.tsx` | `clearTimeout(connectionTimeout);` | L251 |
+| `components/game/GameInterface.tsx` | `// Start timer for this attempt` | L262 |
+| `components/game/GameInterface.tsx` | `setStartTime(Date.now());` | L263 |
+| `components/game/GameInterface.tsx` | `moves: 0,` | L271 |
+| `components/game/GameInterface.tsx` | `await new Promise((resolve) => setTimeout(resolve, gameState?.executionSpeed \|\| 500));` | L319 |
+| `components/game/GameInterface.tsx` | `moves: event.moves,` | L331 |
+| `components/game/GameInterface.tsx` | `if (gameState && startTime) \{` | L363 |
+| `components/game/GameInterface.tsx` | `const timeElapsed = Math.floor((Date.now() - startTime) / 1000);` | L364 |
+| `components/game/GameInterface.tsx` | `moves: gameState.moves,` | L370 |
+| `components/game/GameInterface.tsx` | `time: timeElapsed,` | L371 |
+| `components/game/GameInterface.tsx` | `moves: 0,` | L406 |
+| `components/game/GameInterface.tsx` | `if (gameState && startTime) \{` | L440 |
+| `components/game/GameInterface.tsx` | `const timeElapsed = Math.floor((Date.now() - startTime) / 1000); // in seconds` | L441 |
+| `components/game/GameInterface.tsx` | `moves: gameState.moves,` | L448 |
+| `components/game/GameInterface.tsx` | `time: timeElapsed,` | L449 |
+| `components/game/GameInterface.tsx` | `<div className="mb-2">Moves used: <span className="font-semibold text-blue-600">\{gameState.moves\}</span></div>` | L754 |
+| `components/game/GameInterface.tsx` | `<div>Max moves: <span className="font-semibold text-blue-600">\{gameState.maxMoves\}</span></div>` | L755 |
+
+
+</details>
+</tool-use>
+
+---
+
+<tool-use data-tool-type="read" data-tool-name="read_file">
+<details><summary>Tool use: **read_file** • Read file: supabase/migrations/001_create_user_progress.sql</summary>
+
+</details>
+</tool-use>
+
+---
+
+
+
+---
+
+
+Checking how stats are tracked and when they're saved:
+
+
+---
+
+<tool-use data-tool-type="read" data-tool-name="read_file">
+<details><summary>Tool use: **read_file** • Read file: components/game/GameInterface.tsx</summary>
+
+</details>
+</tool-use>
+
+---
+
+<tool-use data-tool-type="read" data-tool-name="read_file">
+<details><summary>Tool use: **read_file** • Read file: app/api/user/progress/complete/route.ts</summary>
+
+</details>
+</tool-use>
+
+---
+
+<tool-use data-tool-type="search" data-tool-name="codebase_search">
+<details>
+                <summary>Tool use: **codebase_search** • Searched codebase "How are level attempts tracked and when are stats saved to the database?" • **12** results</summary>
+            
+| File | Lines |
+|------|-------|
+| `lib/db/user-progress.ts` | L43-149 |
+| `lib/db/user-progress.ts` | L18-149 |
+| `components/game/GameInterface.tsx` | L26-795 |
+| `supabase/migrations/001_create_user_progress.sql` | L54 |
+| `app/api/user/progress/complete/route.ts` | L42 |
+| `app/api/user/progress/route.ts` | L4-76 |
+| `DATABASE_SETUP.md` | L62 |
+| `app/api/game/execute/route.ts` | L73 |
+| `DATABASE_SETUP.md` | L59-67 |
+| `components/game/GameInterface.tsx` | L18-795 |
+| `lib/db/user-progress.ts` | L41 |
+| `components/game/GameStats.tsx` | L2-34 |
+
+</details>
+</tool-use>
+
+---
+
+
+
+---
+
+
+Implementing per-level stats persistence. Creating the necessary functions and updating components:
+
+
+---
+
+<tool-use data-tool-type="task" data-tool-name="todo_write">
+<details><summary>Tool use: **todo_write** • Todo List</summary>
+
+- [-] Extend UserProgress interface and database functions to track per-level stats (attempts, current moves, time)
+- [ ] Create API endpoint to save/load level stats
+- [ ] Update GameInterface to track attempts and load/save stats
+- [ ] Update GameStats component to display saved stats
+
+</details>
+</tool-use>
+
+---
+
+<tool-use data-tool-type="write" data-tool-name="search_replace">
+
+<details><summary>Tool use: **search_replace** • Edit file: lib/db/user-progress.ts</summary>
+
+**Chunk 1**
+Lines added: 9, lines removed: undefined
+
+```diff
+@@ -1,3 +1,12 @@
+  import { createClient } from '@/lib/supabase/server';
++ 
++ export interface LevelStats {
++   moves: number;
++   time: number;
++   completed_at?: string;
++   attempts?: number;
++   best_moves?: number;
++   best_time?: number;
++ }
+  
+  export interface UserProgress {
+```
+
+**Chunk 2**
+Lines added: 1, lines removed: 5
+
+```diff
+@@ -8,9 +17,5 @@
+    total_moves: number;
+    total_time: number;
+-   best_scores: Record&lt;number, {
+-     moves: number;
+-     time: number;
+-     completed_at: string;
+-   }&gt;;
++   best_scores: Record&lt;number, LevelStats&gt;;
+    updated_at?: string;
+    created_at?: string;
+```
+
+</details>
+
+</tool-use>
+
+---
+
+<tool-use data-tool-type="write" data-tool-name="search_replace">
+
+<details><summary>Tool use: **search_replace** • Edit file: lib/db/user-progress.ts</summary>
+
+**Chunk 1**
+Lines added: 11, lines removed: 3
+
+```diff
+@@ -131,8 +131,16 @@
+      
+      // Update best score if this is better or first completion
+-     if (!bestScores[level] || moves &lt; bestScores[level].moves) {
++     const existingStats = bestScores[level] || { attempts: 0 };
++     if (!bestScores[level] || moves &lt; (bestScores[level].best_moves || Infinity)) {
++       bestScores[level] = {
++         ...existingStats,
++         best_moves: moves,
++         best_time: time,
++         completed_at: new Date().toISOString(),
++       };
++     } else {
++       // Keep existing best scores but update completion time
+        bestScores[level] = {
+-         moves,
+-         time,
++         ...existingStats,
+          completed_at: new Date().toISOString(),
+        };
+```
+
+</details>
+
+</tool-use>
+
+---
+
+<tool-use data-tool-type="write" data-tool-name="search_replace">
+
+<details><summary>Tool use: **search_replace** • Edit file: lib/db/user-progress.ts</summary>
+
+**Chunk 1**
+Lines added: 3, lines removed: 2
+
+```diff
+@@ -117,7 +117,8 @@
+          best_scores: {
+            [level]: {
+-             moves,
+-             time,
++             best_moves: moves,
++             best_time: time,
+              completed_at: new Date().toISOString(),
++             attempts: 1,
+            },
+          },
+```
+
+</details>
+
+</tool-use>
+
+---
+
+<tool-use data-tool-type="read" data-tool-name="read_file">
+<details><summary>Tool use: **read_file** • Read file: lib/db/user-progress.ts</summary>
+
+</details>
+</tool-use>
+
+---
+
+
+
+---
+
+
+Adding functions to update and retrieve level stats:
+
+
+---
+
+<tool-use data-tool-type="write" data-tool-name="search_replace">
+
+<details><summary>Tool use: **search_replace** • Edit file: lib/db/user-progress.ts</summary>
+
+**Chunk 1**
+Lines added: 77, lines removed: undefined
+
+```diff
+@@ -163,4 +163,81 @@
+    }
+  }
++ 
++ /**
++  * Update level stats (attempts, current moves, time) without completing the level
++  */
++ export async function updateLevelStats(
++   userId: string,
++   level: number,
++   moves: number,
++   time: number,
++   incrementAttempts: boolean = false
++ ): Promise&lt;boolean&gt; {
++   try {
++     const currentProgress = await getUserProgress(userId);
++     
++     if (!currentProgress) {
++       // Create new progress with initial stats
++       const newProgress: UserProgress = {
++         user_id: userId,
++         current_level: 1,
++         completed_levels: [],
++         total_moves: 0,
++         total_time: 0,
++         best_scores: {
++           [level]: {
++             moves,
++             time,
++             attempts: incrementAttempts ? 1 : 0,
++           },
++         },
++       };
++       return await saveUserProgress(newProgress);
++     }
++ 
++     const bestScores = { ...currentProgress.best_scores };
++     const existingStats = bestScores[level] || { attempts: 0 };
++     
++     bestScores[level] = {
++       ...existingStats,
++       moves,
++       time,
++       attempts: (existingStats.attempts || 0) + (incrementAttempts ? 1 : 0),
++       // Preserve best scores if they exist
++       best_moves: existingStats.best_moves,
++       best_time: existingStats.best_time,
++       completed_at: existingStats.completed_at,
++     };
++ 
++     const updatedProgress: UserProgress = {
++       ...currentProgress,
++       best_scores: bestScores,
++     };
++ 
++     return await saveUserProgress(updatedProgress);
++   } catch (error) {
++     console.error('Error updating level stats:', error);
++     return false;
++   }
++ }
++ 
++ /**
++  * Get stats for a specific level
++  */
++ export async function getLevelStats(
++   userId: string,
++   level: number
++ ): Promise&lt;LevelStats | null&gt; {
++   try {
++     const progress = await getUserProgress(userId);
++     if (!progress) {
++       return null;
++     }
++     return progress.best_scores[level] || null;
++   } catch (error) {
++     console.error('Error getting level stats:', error);
++     return null;
++   }
++ }
+  
+  
+```
+
+</details>
+
+</tool-use>
+
+---
+
+<tool-use data-tool-type="generic" data-tool-name="read_lints">
+<details>
+          <summary>Tool use: **read_lints** • Read lints for 1 file</summary>
+      
+Lint paths:
+
+- `lib/db/user-progress.ts`
+
+Lint results
+
+
+**No lint errors found**
+</details>
+</tool-use>
+
+---
+
+
+
+---
+
+
+Creating an API endpoint for level stats:
+
+
+---
+
+<tool-use data-tool-type="write" data-tool-name="write">
+
+<details><summary>Tool use: **write** • Edit file: app/api/user/progress/stats/route.ts</summary>
+
+**Chunk 1**
+Lines added: 89, lines removed: 1
+
+```diff
+@@ -1,1 +1,89 @@
+- 
++ import { NextRequest, NextResponse } from 'next/server';
++ import { createClient } from '@/lib/supabase/server';
++ import { updateLevelStats, getLevelStats } from '@/lib/db/user-progress';
++ 
++ export async function GET(
++   request: NextRequest,
++   { params }: { params?: { levelId?: string } }
++ ) {
++   try {
++     const supabase = await createClient();
++     const {
++       data: { user },
++     } = await supabase.auth.getUser();
++ 
++     if (!user) {
++       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
++     }
++ 
++     const { searchParams } = new URL(request.url);
++     const level = parseInt(searchParams.get('level') || '0');
++ 
++     if (isNaN(level) || level &lt; 1) {
++       return NextResponse.json(
++         { error: 'Invalid level number' },
++         { status: 400 }
++       );
++     }
++ 
++     const stats = await getLevelStats(user.id, level);
++     return NextResponse.json(stats || { attempts: 0 });
++   } catch (error: any) {
++     console.error('Error fetching level stats:', error);
++     return NextResponse.json(
++       { error: 'Internal server error' },
++       { status: 500 }
++     );
++   }
++ }
++ 
++ export async function POST(request: NextRequest) {
++   try {
++     const supabase = await createClient();
++     const {
++       data: { user },
++     } = await supabase.auth.getUser();
++ 
++     if (!user) {
++       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
++     }
++ 
++     const body = await request.json();
++     const { level, moves, time, incrementAttempts } = body;
++ 
++     if (
++       typeof level !== 'number' ||
++       typeof moves !== 'number' ||
++       typeof time !== 'number'
++     ) {
++       return NextResponse.json(
++         { error: 'Invalid parameters' },
++         { status: 400 }
++       );
++     }
++ 
++     const success = await updateLevelStats(
++       user.id,
++       level,
++       moves,
++       time,
++       incrementAttempts === true
++     );
++ 
++     if (!success) {
++       return NextResponse.json(
++         { error: 'Failed to update stats' },
++         { status: 500 }
++       );
++     }
++ 
++     return NextResponse.json({ success: true });
++   } catch (error: any) {
++     console.error('Error updating level stats:', error);
++     return NextResponse.json(
++       { error: 'Internal server error' },
++       { status: 500 }
++     );
++   }
++ }
++ 
+```
+
+</details>
+
+</tool-use>
+
+---
+
+<tool-use data-tool-type="task" data-tool-name="todo_write">
+<details><summary>Tool use: **todo_write** • Todo List</summary>
+
+- [x] Extend UserProgress interface and database functions to track per-level stats (attempts, current moves, time)
+- [x] Create API endpoint to save/load level stats
+- [-] Update GameInterface to track attempts and load/save stats
+- [ ] Update GameStats component to display saved stats
+
+</details>
+</tool-use>
+
+---
+
+<tool-use data-tool-type="read" data-tool-name="read_file">
+<details><summary>Tool use: **read_file** • Read file: components/game/GameInterface.tsx</summary>
+
+</details>
+</tool-use>
+
+---
+
+
+
+---
+
+
+Updating GameInterface to track and save stats:
+
+
+---
+
+<tool-use data-tool-type="write" data-tool-name="search_replace">
+
+<details><summary>Tool use: **search_replace** • Edit file: components/game/GameInterface.tsx</summary>
+
+**Chunk 1**
+Lines added: 5, lines removed: undefined
+
+```diff
+@@ -43,4 +43,9 @@
+    const [hasShownWinModal, setHasShownWinModal] = useState(false);
+    const [startTime, setStartTime] = useState&lt;number | null&gt;(null);
++   const [levelStats, setLevelStats] = useState&lt;{
++     attempts: number;
++     best_moves?: number;
++     best_time?: number;
++   }&gt;({ attempts: 0 });
+    const wsRef = useRef&lt;WebSocket | null&gt;(null);
+  
+```
+
+</details>
+
+</tool-use>
+
+---
+
+<tool-use data-tool-type="write" data-tool-name="search_replace">
+
+<details><summary>Tool use: **search_replace** • Edit file: components/game/GameInterface.tsx</summary>
+
+**Chunk 1**
+Lines added: 1, lines removed: 1
+
+```diff
+@@ -50,5 +50,5 @@
+    const wsRef = useRef&lt;WebSocket | null&gt;(null);
+  
+-   // Fetch level data
++   // Fetch level data and stats
+    useEffect(() =&gt; {
+      const fetchLevel = async () =&gt; {
+```
+
+**Chunk 2**
+Lines added: 15, lines removed: undefined
+
+```diff
+@@ -76,4 +76,19 @@
+          setHasShownWinModal(false);
+          setStartTime(null);
++ 
++         // Load level stats
++         try {
++           const statsResponse = await fetch(&#96;/api/user/progress/stats?level=${level}&#96;);
++           if (statsResponse.ok) {
++             const stats = await statsResponse.json();
++             setLevelStats({
++               attempts: stats.attempts || 0,
++               best_moves: stats.best_moves,
++               best_time: stats.best_time,
++             });
++           }
++         } catch (error) {
++           console.error('Error loading level stats:', error);
++         }
+        } catch (error) {
+          console.error('Error loading level:', error);
+```
+
+</details>
+
+</tool-use>
+
+---
+
+<tool-use data-tool-type="write" data-tool-name="search_replace">
+
+<details><summary>Tool use: **search_replace** • Edit file: components/game/GameInterface.tsx</summary>
+
+**Chunk 1**
+Lines added: 20, lines removed: 1
+
+```diff
+@@ -282,5 +282,24 @@
+      // Start timer for this attempt
+      setStartTime(Date.now());
+- 
++     
++     // Increment attempts counter
++     setLevelStats((prev) =&gt; ({ ...prev, attempts: (prev.attempts || 0) + 1 }));
++     
++     // Save attempt to database
++     try {
++       await fetch('/api/user/progress/stats', {
++         method: 'POST',
++         headers: { 'Content-Type': 'application/json' },
++         body: JSON.stringify({
++           level,
++           moves: 0,
++           time: 0,
++           incrementAttempts: true,
++         }),
++       });
++     } catch (error) {
++       console.error('Error saving attempt:', error);
++     }
++ 
+      setGameState((prev) =&gt; {
+        if (!prev) return prev;
+```
+
+</details>
+
+</tool-use>
+
+---
+
+<tool-use data-tool-type="read" data-tool-name="read_file">
+<details><summary>Tool use: **read_file** • Read file: components/game/GameInterface.tsx</summary>
+
+</details>
+</tool-use>
+
+---
+
+
+
+---
+
+
+Updating execution completion handlers to save stats and pass stats to GameStats:
+
+
+---
+
+<tool-use data-tool-type="read" data-tool-name="read_file">
+<details><summary>Tool use: **read_file** • Read file: components/game/GameInterface.tsx</summary>
+
+</details>
+</tool-use>
+
+---
+
+<tool-use data-tool-type="read" data-tool-name="read_file">
+<details><summary>Tool use: **read_file** • Read file: components/game/GameInterface.tsx</summary>
+
+</details>
+</tool-use>
+
+---
+
+<tool-use data-tool-type="search" data-tool-name="grep">
+<details>
+<summary>Tool use: **grep** • Grep for "GameStats" in "components/game/GameInterface.tsx" • 2 matches</summary>
+
+Output mode: content
+
+
+| File | Content | Line |
+|------|------|------|
+| `components/game/GameInterface.tsx` | `import GameStats from './GameStats';` | L11 |
+| `components/game/GameInterface.tsx` | `<GameStats gameState=\{gameState\} />` | L705 |
+
+
+</details>
+</tool-use>
+
+---
+
+
+
+---
+
+
+Updating execution completion handlers to save stats and updating GameStats to display them:
+
+
+---
+
+<tool-use data-tool-type="write" data-tool-name="search_replace">
+
+<details><summary>Tool use: **search_replace** • Edit file: components/game/GameInterface.tsx</summary>
+
+**Chunk 1**
+Lines added: 18, lines removed: undefined
+
+```diff
+@@ -223,4 +223,22 @@
+                });
+                setConsoleOutput((prev) =&gt; [...prev, data.result?.message || 'Execution complete']);
++               
++               // Save stats when execution completes
++               if (gameState &amp;&amp; startTime) {
++                 const timeElapsed = Math.floor((Date.now() - startTime) / 1000);
++                 fetch('/api/user/progress/stats', {
++                   method: 'POST',
++                   headers: { 'Content-Type': 'application/json' },
++                   body: JSON.stringify({
++                     level,
++                     moves: gameState.moves,
++                     time: timeElapsed,
++                     incrementAttempts: false,
++                   }),
++                 }).catch((error) =&gt; {
++                   console.error('Error saving stats:', error);
++                 });
++               }
++               
+                // Show win modal when execution completes and goal is reached
+                if (data.result?.reachedGoal &amp;&amp; !hasShownWinModal) {
+```
+
+</details>
+
+</tool-use>
+
+---
+
+The string to replace was not found in the file.
+
+---
+
+<tool-use data-tool-type="read" data-tool-name="read_file">
+<details><summary>Tool use: **read_file** • Read file: components/game/GameInterface.tsx</summary>
+
+</details>
+</tool-use>
+
+---
+
+Model supplied an ambiguous edit
+
+---
+
+<tool-use data-tool-type="write" data-tool-name="search_replace">
+
+<details><summary>Tool use: **search_replace** • Edit file: components/game/GameStats.tsx</summary>
+
+**Chunk 1**
+Lines added: 27, lines removed: 1
+
+```diff
+@@ -2,10 +2,36 @@
+  
+  import { GameState } from '@/types/game';
++ 
++ interface LevelStats {
++   attempts: number;
++   best_moves?: number;
++   best_time?: number;
++ }
+  
+  interface GameStatsProps {
+    gameState: GameState;
++   levelStats?: LevelStats;
+  }
+  
+- export default function GameStats({ gameState }: GameStatsProps) {
++ function formatTime(seconds: number | undefined): string {
++   if (!seconds &amp;&amp; seconds !== 0) return '0:00';
++   const mins = Math.floor(seconds / 60);
++   const secs = seconds % 60;
++   return &#96;${mins}:${secs.toString().padStart(2, '0')}&#96;;
++ }
++ 
++ function getStarRating(bestMoves: number | undefined, maxMoves: number): string {
++   if (!bestMoves) return '---';
++   const percentage = (maxMoves - bestMoves) / maxMoves;
++   if (percentage &gt;= 0.5) return '⭐⭐⭐';
++   if (percentage &gt;= 0.25) return '⭐⭐';
++   return '⭐';
++ }
++ 
++ export default function GameStats({ gameState, levelStats }: GameStatsProps) {
++   const attempts = levelStats?.attempts || 0;
++   const bestMoves = levelStats?.best_moves;
++   const bestTime = levelStats?.best_time;
++ 
+    return (
+      &lt;div className="rounded-lg border border-gray-200 bg-white p-4"&gt;
+```
+
+**Chunk 2**
+Lines added: 13, lines removed: 3
+
+```diff
+@@ -20,13 +46,23 @@
+          &lt;div className="flex justify-between"&gt;
+            &lt;span className="text-slate-600"&gt;Time:&lt;/span&gt;
+-           &lt;span className="font-semibold text-blue-600"&gt;0:00&lt;/span&gt;
++           &lt;span className="font-semibold text-blue-600"&gt;
++             {formatTime(Math.floor((Date.now() - (gameState as any).startTime || 0) / 1000))}
++           &lt;/span&gt;
+          &lt;/div&gt;
+          &lt;div className="flex justify-between"&gt;
+            &lt;span className="text-slate-600"&gt;Attempts:&lt;/span&gt;
+-           &lt;span className="font-semibold text-blue-600"&gt;1&lt;/span&gt;
++           &lt;span className="font-semibold text-blue-600"&gt;{attempts || 0}&lt;/span&gt;
+          &lt;/div&gt;
+          &lt;div className="flex justify-between"&gt;
+            &lt;span className="text-slate-600"&gt;Best Score:&lt;/span&gt;
+-           &lt;span className="font-semibold text-green-600"&gt;⭐⭐⭐&lt;/span&gt;
++           &lt;span className="font-semibold text-green-600"&gt;
++             {bestMoves ? (
++               &lt;span&gt;
++                 {getStarRating(bestMoves, gameState.maxMoves)} ({bestMoves} moves, {formatTime(bestTime)})
++               &lt;/span&gt;
++             ) : (
++               '---'
++             )}
++           &lt;/span&gt;
+          &lt;/div&gt;
+        &lt;/div&gt;
+```
+
+</details>
+
+</tool-use>
+
+---
+
+<tool-use data-tool-type="generic" data-tool-name="read_lints">
+<details>
+          <summary>Tool use: **read_lints** • Read lints for 3 files</summary>
+      
+Lint paths:
+
+- `components/game/GameStats.tsx`
+- `components/game/GameInterface.tsx`
+- `app/api/user/progress/stats/route.ts`
+
+Lint results
+
+
+**No lint errors found**
+</details>
+</tool-use>
+
+---
+
+
+
+---
+
+
+Reading the file to fix the HTTP fallback handler:
+
+
+---
+
+<tool-use data-tool-type="read" data-tool-name="read_file">
+<details><summary>Tool use: **read_file** • Read file: components/game/GameInterface.tsx</summary>
+
+</details>
+</tool-use>
+
+---
+
+<tool-use data-tool-type="read" data-tool-name="read_file">
+<details><summary>Tool use: **read_file** • Read file: components/game/GameInterface.tsx</summary>
+
+</details>
+</tool-use>
+
+---
+
+
+
+---
+
+
+
+
+
+---
+
+<tool-use data-tool-type="write" data-tool-name="search_replace">
+
+<details><summary>Tool use: **search_replace** • Edit file: components/game/GameInterface.tsx</summary>
+
+**Chunk 1**
+Lines added: 18, lines removed: undefined
+
+```diff
+@@ -413,4 +413,22 @@
+              };
+            });
++           // Save stats when execution completes
++           if (gameState &amp;&amp; startTime) {
++             const timeElapsed = Math.floor((Date.now() - startTime) / 1000);
++             // Save current stats
++             fetch('/api/user/progress/stats', {
++               method: 'POST',
++               headers: { 'Content-Type': 'application/json' },
++               body: JSON.stringify({
++                 level,
++                 moves: gameState.moves,
++                 time: timeElapsed,
++                 incrementAttempts: false,
++               }),
++             }).catch((error) =&gt; {
++               console.error('Error saving stats:', error);
++             });
++           }
++           
+            // Show win modal when execution completes and goal is reached
+            if (data.result.reachedGoal &amp;&amp; !hasShownWinModal) {
+```
+
+</details>
+
+</tool-use>
+
+---
+
+<tool-use data-tool-type="search" data-tool-name="grep">
+<details>
+<summary>Tool use: **grep** • Grep for "GameStats" in "components/game/GameInterface.tsx" • 2 matches</summary>
+
+Output mode: content
+
+
+| File | Content | Line |
+|------|------|------|
+| `components/game/GameInterface.tsx` | `import GameStats from './GameStats';` | L11 |
+| `components/game/GameInterface.tsx` | `<GameStats gameState=\{gameState\} />` | L741 |
+
+
+</details>
+</tool-use>
+
+---
+
+
+
+---
+
+
+
+
+
+---
+
+<tool-use data-tool-type="read" data-tool-name="read_file">
+<details><summary>Tool use: **read_file** • Read file: components/game/GameInterface.tsx</summary>
+
+</details>
+</tool-use>
+
+---
+
+<tool-use data-tool-type="write" data-tool-name="search_replace">
+
+<details><summary>Tool use: **search_replace** • Edit file: components/game/GameInterface.tsx</summary>
+
+**Chunk 1**
+Lines added: 1, lines removed: 1
+
+```diff
+@@ -739,5 +739,5 @@
+              {activeTab === 'stats' &amp;&amp; (
+                &lt;div className="p-6"&gt;
+-                 &lt;GameStats gameState={gameState} /&gt;
++                 &lt;GameStats gameState={gameState} levelStats={levelStats} /&gt;
+                &lt;/div&gt;
+              )}
+```
+
+</details>
+
+</tool-use>
+
+---
+
+<tool-use data-tool-type="read" data-tool-name="read_file">
+<details><summary>Tool use: **read_file** • Read file: components/game/GameStats.tsx</summary>
+
+</details>
+</tool-use>
+
+---
+
+
+
+---
+
+
+Fixing the time display in GameStats. Tracking elapsed time and passing it correctly:
+
+
+---
+
+<tool-use data-tool-type="read" data-tool-name="read_file">
+<details><summary>Tool use: **read_file** • Read file: components/game/GameInterface.tsx</summary>
+
+</details>
+</tool-use>
+
+---
+
+<tool-use data-tool-type="write" data-tool-name="search_replace">
+
+<details><summary>Tool use: **search_replace** • Edit file: components/game/GameInterface.tsx</summary>
+
+**Chunk 1**
+Lines added: 1, lines removed: undefined
+
+```diff
+@@ -43,4 +43,5 @@
+    const [hasShownWinModal, setHasShownWinModal] = useState(false);
+    const [startTime, setStartTime] = useState&lt;number | null&gt;(null);
++   const [elapsedTime, setElapsedTime] = useState&lt;number&gt;(0);
+    const [levelStats, setLevelStats] = useState&lt;{
+      attempts: number;
+```
+
+</details>
+
+</tool-use>
+
+---
+
+<tool-use data-tool-type="write" data-tool-name="search_replace">
+
+<details><summary>Tool use: **search_replace** • Edit file: components/game/GameInterface.tsx</summary>
+
+**Chunk 1**
+Lines added: 1, lines removed: undefined
+
+```diff
+@@ -77,4 +77,5 @@
+          setHasShownWinModal(false);
+          setStartTime(null);
++         setElapsedTime(0);
+  
+          // Load level stats
+```
+
+</details>
+
+</tool-use>
+
+---
+
+<tool-use data-tool-type="write" data-tool-name="search_replace">
+
+<details><summary>Tool use: **search_replace** • Edit file: components/game/GameInterface.tsx</summary>
+
+**Chunk 1**
+Lines added: 4, lines removed: undefined
+
+```diff
+@@ -191,4 +191,8 @@
+                  };
+                });
++               // Update elapsed time
++               if (startTime) {
++                 setElapsedTime(Math.floor((Date.now() - startTime) / 1000));
++               }
+                setConsoleOutput((prev) =&gt; [...prev, data.message]);
+                // Show win modal when goal is reached
+```
+
+</details>
+
+</tool-use>
+
+---
+
+<tool-use data-tool-type="write" data-tool-name="search_replace">
+
+<details><summary>Tool use: **search_replace** • Edit file: components/game/GameInterface.tsx</summary>
+
+**Chunk 1**
+Lines added: 4, lines removed: undefined
+
+```diff
+@@ -395,4 +395,8 @@
+                  };
+                });
++               // Update elapsed time
++               if (startTime) {
++                 setElapsedTime(Math.floor((Date.now() - startTime) / 1000));
++               }
+                setConsoleOutput((prev) =&gt; [...prev, event.message]);
+                // Show win modal when goal is reached
+```
+
+</details>
+
+</tool-use>
+
+---
+
+<tool-use data-tool-type="write" data-tool-name="search_replace">
+
+<details><summary>Tool use: **search_replace** • Edit file: components/game/GameInterface.tsx</summary>
+
+**Chunk 1**
+Lines added: 1, lines removed: 1
+
+```diff
+@@ -749,5 +749,5 @@
+              {activeTab === 'stats' &amp;&amp; (
+                &lt;div className="p-6"&gt;
+-                 &lt;GameStats gameState={gameState} levelStats={levelStats} /&gt;
++                 &lt;GameStats gameState={gameState} levelStats={levelStats} elapsedTime={elapsedTime} /&gt;
+                &lt;/div&gt;
+              )}
+```
+
+</details>
+
+</tool-use>
+
+---
+
+<tool-use data-tool-type="write" data-tool-name="search_replace">
+
+<details><summary>Tool use: **search_replace** • Edit file: components/game/GameStats.tsx</summary>
+
+**Chunk 1**
+Lines added: 1, lines removed: undefined
+
+```diff
+@@ -12,4 +12,5 @@
+    gameState: GameState;
+    levelStats?: LevelStats;
++   elapsedTime?: number;
+  }
+  
+```
+
+</details>
+
+</tool-use>
+
+---
+
+<tool-use data-tool-type="write" data-tool-name="search_replace">
+
+<details><summary>Tool use: **search_replace** • Edit file: components/game/GameStats.tsx</summary>
+
+**Chunk 1**
+Lines added: 2, lines removed: 1
+
+```diff
+@@ -30,8 +30,9 @@
+  }
+  
+- export default function GameStats({ gameState, levelStats }: GameStatsProps) {
++ export default function GameStats({ gameState, levelStats, elapsedTime }: GameStatsProps) {
+    const attempts = levelStats?.attempts || 0;
+    const bestMoves = levelStats?.best_moves;
+    const bestTime = levelStats?.best_time;
++   const currentTime = elapsedTime || 0;
+  
+    return (
+```
+
+</details>
+
+</tool-use>
+
+---
+
+<tool-use data-tool-type="write" data-tool-name="search_replace">
+
+<details><summary>Tool use: **search_replace** • Edit file: components/game/GameStats.tsx</summary>
+
+**Chunk 1**
+Lines added: 1, lines removed: 1
+
+```diff
+@@ -49,5 +49,5 @@
+            &lt;span className="text-slate-600"&gt;Time:&lt;/span&gt;
+            &lt;span className="font-semibold text-blue-600"&gt;
+-             {formatTime(Math.floor((Date.now() - (gameState as any).startTime || 0) / 1000))}
++             {formatTime(currentTime)}
+            &lt;/span&gt;
+          &lt;/div&gt;
+```
+
+</details>
+
+</tool-use>
+
+---
+
+<tool-use data-tool-type="generic" data-tool-name="read_lints">
+<details>
+          <summary>Tool use: **read_lints** • Read lints for 2 files</summary>
+      
+Lint paths:
+
+- `components/game/GameStats.tsx`
+- `components/game/GameInterface.tsx`
+
+Lint results
+
+
+**No lint errors found**
+</details>
+</tool-use>
+
+---
+
+<tool-use data-tool-type="task" data-tool-name="todo_write">
+<details><summary>Tool use: **todo_write** • Todo List</summary>
+
+- [x] Extend UserProgress interface and database functions to track per-level stats (attempts, current moves, time)
+- [x] Create API endpoint to save/load level stats
+- [x] Update GameInterface to track attempts and load/save stats
+- [x] Update GameStats component to display saved stats
+
+</details>
+</tool-use>
+
+---
+
+
+
+---
+
+
+Adding a real-time timer to update elapsed time during execution:
+
+
+---
+
+<tool-use data-tool-type="read" data-tool-name="read_file">
+<details><summary>Tool use: **read_file** • Read file: components/game/GameInterface.tsx</summary>
+
+</details>
+</tool-use>
+
+---
+
+<tool-use data-tool-type="write" data-tool-name="search_replace">
+
+<details><summary>Tool use: **search_replace** • Edit file: components/game/GameInterface.tsx</summary>
+
+**Chunk 1**
+Lines added: 14, lines removed: undefined
+
+```diff
+@@ -141,4 +141,18 @@
+      fetchLevelsAndProgress();
+    }, [router]);
++ 
++   // Update elapsed time every second when game is executing
++   useEffect(() =&gt; {
++     if (!startTime) {
++       setElapsedTime(0);
++       return;
++     }
++ 
++     const interval = setInterval(() =&gt; {
++       setElapsedTime(Math.floor((Date.now() - startTime) / 1000));
++     }, 1000);
++ 
++     return () =&gt; clearInterval(interval);
++   }, [startTime]);
+  
+    useEffect(() =&gt; {
+```
+
+</details>
+
+</tool-use>
+
+---
+
+<tool-use data-tool-type="generic" data-tool-name="read_lints">
+<details>
+          <summary>Tool use: **read_lints** • Read lints for 1 file</summary>
+      
+Lint paths:
+
+- `components/game/GameInterface.tsx`
+
+Lint results
+
+
+**No lint errors found**
+</details>
+</tool-use>
+
+---
+
+
+
+---
+
+
+## Changes Made
+
+1. **Extended Database Schema** (`lib/db/user-progress.ts`):
+   - Added `LevelStats` interface with `attempts`, `best_moves`, and `best_time`
+   - Updated `best_scores` to store per-level stats
+   - Added `updateLevelStats()` to save stats without completing the level
+   - Added `getLevelStats()` to retrieve stats for a specific level
+
+2. **Created API Endpoint** (`app/api/user/progress/stats/route.ts`):
+   - `GET` endpoint to fetch stats for a specific level
+   - `POST` endpoint to save/update level stats (moves, time, attempts)
+
+3. **Updated GameInterface Component**:
+   - Added `levelStats` state to track attempts and best scores
+   - Added `elapsedTime` state for real-time time tracking
+   - Loads stats when a level is visited
+   - Increments and saves attempts when code is run
+   - Saves stats (moves, time) when execution completes
+   - Updates elapsed time in real-time with a timer
+   - Passes stats to GameStats component
+
+4. **Updated GameStats Component**:
+   - Displays current moves from gameState
+   - Shows real-time elapsed time for current attempt
+   - Displays total attempts from saved stats
+   - Shows best score (moves and time) with star rating when available
+
+## How It Works
+
+- When a user visits a level: Stats are loaded from the database
+- When code is run: Attempts counter is incremented and saved
+- During execution: Elapsed time updates in real-time
+- After execution: Current moves and time are saved to the database
+- When level is completed: Best scores are updated if the current attempt is better
+
+All stats persist in the database and are restored when users revisit levels.
+
+---
+

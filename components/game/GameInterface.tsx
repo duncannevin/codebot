@@ -42,9 +42,15 @@ export default function GameInterface({ user, initialLevel }: GameInterfaceProps
   const [showWinModal, setShowWinModal] = useState(false);
   const [hasShownWinModal, setHasShownWinModal] = useState(false);
   const [startTime, setStartTime] = useState<number | null>(null);
+  const [elapsedTime, setElapsedTime] = useState<number>(0);
+  const [levelStats, setLevelStats] = useState<{
+    attempts: number;
+    best_moves?: number;
+    best_time?: number;
+  }>({ attempts: 0 });
   const wsRef = useRef<WebSocket | null>(null);
 
-  // Fetch level data
+  // Fetch level data and stats
   useEffect(() => {
     const fetchLevel = async () => {
       try {
@@ -70,6 +76,22 @@ solveMaze();`);
         setShowWinModal(false);
         setHasShownWinModal(false);
         setStartTime(null);
+        setElapsedTime(0);
+
+        // Load level stats
+        try {
+          const statsResponse = await fetch(`/api/user/progress/stats?level=${level}`);
+          if (statsResponse.ok) {
+            const stats = await statsResponse.json();
+            setLevelStats({
+              attempts: stats.attempts || 0,
+              best_moves: stats.best_moves,
+              best_time: stats.best_time,
+            });
+          }
+        } catch (error) {
+          console.error('Error loading level stats:', error);
+        }
       } catch (error) {
         console.error('Error loading level:', error);
       } finally {
@@ -118,6 +140,20 @@ solveMaze();`);
 
     fetchLevelsAndProgress();
   }, [router]);
+
+  // Update elapsed time every second when game is executing
+  useEffect(() => {
+    if (!startTime) {
+      setElapsedTime(0);
+      return;
+    }
+
+    const interval = setInterval(() => {
+      setElapsedTime(Math.floor((Date.now() - startTime) / 1000));
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [startTime]);
 
   useEffect(() => {
     // Initialize WebSocket connection (optional - falls back to HTTP if not available)
@@ -168,6 +204,10 @@ solveMaze();`);
                   moves: data.moves,
                 };
               });
+              // Update elapsed time
+              if (startTime) {
+                setElapsedTime(Math.floor((Date.now() - startTime) / 1000));
+              }
               setConsoleOutput((prev) => [...prev, data.message]);
               // Show win modal when goal is reached
               if (data.reachedGoal && !hasShownWinModal) {
@@ -202,6 +242,24 @@ solveMaze();`);
                 };
               });
               setConsoleOutput((prev) => [...prev, data.result?.message || 'Execution complete']);
+              
+              // Save stats when execution completes
+              if (gameState && startTime) {
+                const timeElapsed = Math.floor((Date.now() - startTime) / 1000);
+                fetch('/api/user/progress/stats', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    level,
+                    moves: gameState.moves,
+                    time: timeElapsed,
+                    incrementAttempts: false,
+                  }),
+                }).catch((error) => {
+                  console.error('Error saving stats:', error);
+                });
+              }
+              
               // Show win modal when execution completes and goal is reached
               if (data.result?.reachedGoal && !hasShownWinModal) {
                 setShowWinModal(true);
@@ -261,6 +319,25 @@ solveMaze();`);
 
     // Start timer for this attempt
     setStartTime(Date.now());
+    
+    // Increment attempts counter
+    setLevelStats((prev) => ({ ...prev, attempts: (prev.attempts || 0) + 1 }));
+    
+    // Save attempt to database
+    try {
+      await fetch('/api/user/progress/stats', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          level,
+          moves: 0,
+          time: 0,
+          incrementAttempts: true,
+        }),
+      });
+    } catch (error) {
+      console.error('Error saving attempt:', error);
+    }
 
     setGameState((prev) => {
       if (!prev) return prev;
@@ -331,6 +408,10 @@ solveMaze();`);
                   moves: event.moves,
                 };
               });
+              // Update elapsed time
+              if (startTime) {
+                setElapsedTime(Math.floor((Date.now() - startTime) / 1000));
+              }
               setConsoleOutput((prev) => [...prev, event.message]);
               // Show win modal when goal is reached
               if (event.reachedGoal && !hasShownWinModal) {
@@ -355,6 +436,24 @@ solveMaze();`);
               },
             };
           });
+          // Save stats when execution completes
+          if (gameState && startTime) {
+            const timeElapsed = Math.floor((Date.now() - startTime) / 1000);
+            // Save current stats
+            fetch('/api/user/progress/stats', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                level,
+                moves: gameState.moves,
+                time: timeElapsed,
+                incrementAttempts: false,
+              }),
+            }).catch((error) => {
+              console.error('Error saving stats:', error);
+            });
+          }
+          
           // Show win modal when execution completes and goal is reached
           if (data.result.reachedGoal && !hasShownWinModal) {
             setShowWinModal(true);
@@ -663,7 +762,7 @@ solveMaze();`);
             )}
             {activeTab === 'stats' && (
               <div className="p-6">
-                <GameStats gameState={gameState} />
+                <GameStats gameState={gameState} levelStats={levelStats} elapsedTime={elapsedTime} />
               </div>
             )}
             {activeTab === 'functions' && (

@@ -1,5 +1,14 @@
 import { createClient } from '@/lib/supabase/server';
 
+export interface LevelStats {
+  moves: number;
+  time: number;
+  completed_at?: string;
+  attempts?: number;
+  best_moves?: number;
+  best_time?: number;
+}
+
 export interface UserProgress {
   id?: string;
   user_id: string;
@@ -7,11 +16,7 @@ export interface UserProgress {
   completed_levels: number[];
   total_moves: number;
   total_time: number;
-  best_scores: Record<number, {
-    moves: number;
-    time: number;
-    completed_at: string;
-  }>;
+  best_scores: Record<number, LevelStats>;
   updated_at?: string;
   created_at?: string;
 }
@@ -111,9 +116,10 @@ export async function updateLevelCompletion(
         total_time: time,
         best_scores: {
           [level]: {
-            moves,
-            time,
+            best_moves: moves,
+            best_time: time,
             completed_at: new Date().toISOString(),
+            attempts: 1,
           },
         },
       };
@@ -125,10 +131,18 @@ export async function updateLevelCompletion(
     const bestScores = { ...currentProgress.best_scores };
     
     // Update best score if this is better or first completion
-    if (!bestScores[level] || moves < bestScores[level].moves) {
+    const existingStats = bestScores[level] || { attempts: 0 };
+    if (!bestScores[level] || moves < (bestScores[level].best_moves || Infinity)) {
       bestScores[level] = {
-        moves,
-        time,
+        ...existingStats,
+        best_moves: moves,
+        best_time: time,
+        completed_at: new Date().toISOString(),
+      };
+    } else {
+      // Keep existing best scores but update completion time
+      bestScores[level] = {
+        ...existingStats,
         completed_at: new Date().toISOString(),
       };
     }
@@ -146,6 +160,83 @@ export async function updateLevelCompletion(
   } catch (error) {
     console.error('Error updating level completion:', error);
     return false;
+  }
+}
+
+/**
+ * Update level stats (attempts, current moves, time) without completing the level
+ */
+export async function updateLevelStats(
+  userId: string,
+  level: number,
+  moves: number,
+  time: number,
+  incrementAttempts: boolean = false
+): Promise<boolean> {
+  try {
+    const currentProgress = await getUserProgress(userId);
+    
+    if (!currentProgress) {
+      // Create new progress with initial stats
+      const newProgress: UserProgress = {
+        user_id: userId,
+        current_level: 1,
+        completed_levels: [],
+        total_moves: 0,
+        total_time: 0,
+        best_scores: {
+          [level]: {
+            moves,
+            time,
+            attempts: incrementAttempts ? 1 : 0,
+          },
+        },
+      };
+      return await saveUserProgress(newProgress);
+    }
+
+    const bestScores = { ...currentProgress.best_scores };
+    const existingStats = bestScores[level] || { attempts: 0 };
+    
+    bestScores[level] = {
+      ...existingStats,
+      moves,
+      time,
+      attempts: (existingStats.attempts || 0) + (incrementAttempts ? 1 : 0),
+      // Preserve best scores if they exist
+      best_moves: existingStats.best_moves,
+      best_time: existingStats.best_time,
+      completed_at: existingStats.completed_at,
+    };
+
+    const updatedProgress: UserProgress = {
+      ...currentProgress,
+      best_scores: bestScores,
+    };
+
+    return await saveUserProgress(updatedProgress);
+  } catch (error) {
+    console.error('Error updating level stats:', error);
+    return false;
+  }
+}
+
+/**
+ * Get stats for a specific level
+ */
+export async function getLevelStats(
+  userId: string,
+  level: number
+): Promise<LevelStats | null> {
+  try {
+    const progress = await getUserProgress(userId);
+    if (!progress) {
+      return null;
+    }
+    return progress.best_scores[level] || null;
+  } catch (error) {
+    console.error('Error getting level stats:', error);
+    return null;
   }
 }
 
