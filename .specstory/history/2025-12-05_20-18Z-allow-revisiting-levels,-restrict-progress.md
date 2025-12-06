@@ -24354,3 +24354,21 @@ The production errors should be resolved, and the app will use the HTTP API rout
 
 ---
 
+_**User (2025-12-06 08:37Z)**_
+
+in http mode it only sends back a single frame
+
+---
+
+_**Agent (model default, mode Agent)**_
+
+
+
+---
+
+
+Checking the HTTP execute route to see why it only sends one frame:
+
+
+---
+

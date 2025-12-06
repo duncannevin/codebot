@@ -61,11 +61,10 @@ export async function POST(request: NextRequest) {
 
     // Execute code with speed from request or default to gameState speed
     const executionSpeed = speed || gameState.executionSpeed || 500;
-    const result = await executor.execute(code, executionSpeed);
+    await executor.execute(code, executionSpeed);
 
     return NextResponse.json({
       success: true,
-      result,
       events,
     });
   } catch (error: any) {

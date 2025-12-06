@@ -63,16 +63,16 @@ export class CodeExecutor {
       // Now execute the movement (position updates here)
       const moved = movementFn();
       
-      // Create a promise for this movement's visualization
+      // Emit robot_move event immediately after movement (synchronously)
+      // This ensures the event is captured before any async operations
+      this.emit('robot_move', {
+        position: robot.getPosition(),
+        moves: robot.getMoves(),
+        reachedGoal: robot.hasReached(),
+      });
+      
+      // Create a promise for this movement's visualization delay
       const visualizationPromise = (async () => {
-        
-        // Emit robot_move event for game state updates (without message)
-        this.emit('robot_move', {
-          position: robot.getPosition(),
-          moves: robot.getMoves(),
-          reachedGoal: robot.hasReached(),
-        });
-        
         // Add delay for real-time visualization - use executionSpeed
         await delay(executionSpeed);
         
