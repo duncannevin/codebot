@@ -1,0 +1,75 @@
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#4F46E5;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#7C3AED;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="robotGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FBBF24;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#F59E0B;stop-opacity:1" />
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="512" height="512" fill="url(#bgGradient)" rx="64"/>
+  
+  <!-- Grid pattern (code-like) -->
+  <g opacity="0.1">
+    <path d="M64 128 L448 128" stroke="white" stroke-width="2" stroke-linecap="round"/>
+    <path d="M64 192 L448 192" stroke="white" stroke-width="2" stroke-linecap="round"/>
+    <path d="M64 256 L448 256" stroke="white" stroke-width="2" stroke-linecap="round"/>
+    <path d="M64 320 L448 320" stroke="white" stroke-width="2" stroke-linecap="round"/>
+    <path d="M64 384 L448 384" stroke="white" stroke-width="2" stroke-linecap="round"/>
+  </g>
+  
+  <!-- Robot body -->
+  <rect x="156" y="180" width="200" height="200" rx="20" fill="url(#robotGradient)" filter="url(#glow)"/>
+  
+  <!-- Robot head -->
+  <rect x="186" y="120" width="140" height="80" rx="15" fill="url(#robotGradient)"/>
+  
+  <!-- Eyes -->
+  <circle cx="226" cy="160" r="12" fill="#1F2937"/>
+  <circle cx="286" cy="160" r="12" fill="#1F2937"/>
+  <circle cx="226" cy="160" r="6" fill="#60A5FA"/>
+  <circle cx="286" cy="160" r="6" fill="#60A5FA"/>
+  
+  <!-- Antenna -->
+  <circle cx="256" cy="100" r="8" fill="#FBBF24"/>
+  <rect x="252" y="100" width="8" height="20" fill="#FBBF24"/>
+  
+  <!-- Code brackets on chest -->
+  <text x="256" y="280" font-family="monospace" font-size="48" font-weight="bold" fill="#1F2937" text-anchor="middle">{ }</text>
+  
+  <!-- Arms -->
+  <rect x="96" y="200" width="60" height="20" rx="10" fill="url(#robotGradient)"/>
+  <rect x="356" y="200" width="60" height="20" rx="10" fill="url(#robotGradient)"/>
+  
+  <!-- Hands -->
+  <circle cx="96" cy="210" r="12" fill="#1F2937"/>
+  <circle cx="416" cy="210" r="12" fill="#1F2937"/>
+  
+  <!-- Legs -->
+  <rect x="196" y="380" width="40" height="60" rx="10" fill="url(#robotGradient)"/>
+  <rect x="276" y="380" width="40" height="60" rx="10" fill="url(#robotGradient)"/>
+  
+  <!-- Feet -->
+  <ellipse cx="216" cy="450" rx="20" ry="12" fill="#1F2937"/>
+  <ellipse cx="296" cy="450" rx="20" ry="12" fill="#1F2937"/>
+  
+  <!-- Decorative code elements -->
+  <g opacity="0.3" fill="white">
+    <text x="80" y="160" font-family="monospace" font-size="16" font-weight="bold">&lt;/&gt;</text>
+    <text x="400" y="160" font-family="monospace" font-size="16" font-weight="bold">()</text>
+    <text x="80" y="360" font-family="monospace" font-size="16" font-weight="bold">[]</text>
+    <text x="400" y="360" font-family="monospace" font-size="16" font-weight="bold">=&gt;</text>
+  </g>
+</svg>
+
