@@ -55,7 +55,7 @@ export async function POST(request: NextRequest) {
     // Store execution events
     const events: any[] = [];
 
-    executor.onMove((data) => {
+    executor.onMessage((data) => {
       events.push(data);
     });
 

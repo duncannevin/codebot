@@ -64,7 +64,6 @@ export default function GameInterface({ user, initialLevel }: GameInterfaceProps
     requirements?: { passed: boolean; failures: string[] };
   } | null>(null);
   const wsRef = useRef<WebSocket | null>(null);
-  const lastFrameTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Fetch level data and stats
   useEffect(() => {
@@ -229,100 +228,12 @@ solveMaze();`;
               }
               // Don't add message to console output - logs are local only
               
-              // Clear any existing timeout for last frame detection
-              if (lastFrameTimeoutRef.current) {
-                clearTimeout(lastFrameTimeoutRef.current);
-              }
+            } else if (data.type === 'execution_complete') {
+              // Handle execution completion
+              // The result properties are spread directly into the message
+              const { success, message, moves, reachedGoal } = data;
               
-              // Set a timeout to detect if this is the last frame
-              // Wait for animation duration (executionSpeed) plus a small buffer
-              const animationDelay = gameState?.executionSpeed || 500;
-              lastFrameTimeoutRef.current = setTimeout(() => {
-                // If no more robot_move messages arrive, this was the last frame
-                // Send validate_requirements message
-                if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
-                  console.log('[WebSocket Client] Last frame detected, sending validate_requirements');
-                  wsRef.current.send(JSON.stringify({ type: 'validate_requirements' }));
-                }
-                lastFrameTimeoutRef.current = null;
-              }, animationDelay + 100); // Add 100ms buffer after animation completes
-            } else if (data.type === 'requirements_validation') {
-              // Handle validation response from server
-              // This includes both code requirements validation AND goal position verification
-              const validation = data.validation;
-              setExecutionResult({ requirements: validation });
-              
-              // Update game state with actual goal status from server
-              if (validation) {
-                setGameState((prev) => {
-                  if (!prev) return prev;
-                  return {
-                    ...prev,
-                    robot: {
-                      ...prev.robot,
-                      hasReachedGoal: validation.reachedGoal || false,
-                    },
-                  };
-                });
-              }
-              
-              // Show win modal only if robot reached goal AND validation passed (or no requirements)
-              if (validation && (!validation.reachedGoal || !validation.passed)) {
-                // Robot didn't reach goal or requirements not met - don't show win modal
-                const failures = validation.failures || [];
-                if (!validation.reachedGoal) {
-                  setConsoleOutput((prev) => [...prev, '❌ Robot did not reach the goal']);
-                } else {
-                  setConsoleOutput((prev) => [...prev, `❌ Requirements not met: ${failures.join(', ')}`]);
-                }
-              } else if (validation?.reachedGoal && validation?.passed && !hasShownWinModal) {
-                // Robot reached goal AND requirements met - show win modal
-                setShowWinModal(true);
-                setHasShownWinModal(true);
-                // Save progress when level is completed
-                if (gameState && startTime) {
-                  const timeElapsed = Math.floor((Date.now() - startTime) / 1000);
-                  fetch('/api/user/progress/complete', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                      level,
-                      moves: gameState.moves,
-                      time: timeElapsed,
-                    }),
-                  }).catch((error) => {
-                    console.error('Error saving progress:', error);
-                  });
-                }
-              } else if (validation?.reachedGoal && !validation && !hasShownWinModal) {
-                // Robot reached goal and no requirements to validate - show win modal
-                setShowWinModal(true);
-                setHasShownWinModal(true);
-                // Save progress when level is completed
-                if (gameState && startTime) {
-                  const timeElapsed = Math.floor((Date.now() - startTime) / 1000);
-                  fetch('/api/user/progress/complete', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                      level,
-                      moves: gameState.moves,
-                      time: timeElapsed,
-                    }),
-                  }).catch((error) => {
-                    console.error('Error saving progress:', error);
-                  });
-                }
-              }
-              
-              // Reset frontend after validation is complete
-              // Clear any pending timeouts
-              if (lastFrameTimeoutRef.current) {
-                clearTimeout(lastFrameTimeoutRef.current);
-                lastFrameTimeoutRef.current = null;
-              }
-              
-              // Reset game state: stop execution, reset robot to start, reset moves
+              // Stop execution
               setGameState((prev) => {
                 if (!prev) return prev;
                 return {
@@ -330,21 +241,57 @@ solveMaze();`;
                   isExecuting: false,
                   robot: {
                     ...prev.robot,
-                    position: { ...prev.start },
-                    hasReachedGoal: false,
+                    hasReachedGoal: reachedGoal || false,
                   },
-                  moves: 0,
+                  moves: moves,
                 };
               });
+              
+              // Add result message to console
+              setConsoleOutput((prev) => [...prev, message]);
+              
+              // Save stats when execution completes
+              if (gameState && startTime) {
+                const timeElapsed = Math.floor((Date.now() - startTime) / 1000);
+                fetch('/api/user/progress/stats', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    level,
+                    moves: moves,
+                    time: timeElapsed,
+                    incrementAttempts: false,
+                  }),
+                }).catch((error) => {
+                  console.error('Error saving stats:', error);
+                });
+              }
+              
+              // Show win modal if robot reached goal
+              if (reachedGoal && success && !hasShownWinModal) {
+                setShowWinModal(true);
+                setHasShownWinModal(true);
+                
+                // Save progress when level is completed
+                if (gameState && startTime) {
+                  const timeElapsed = Math.floor((Date.now() - startTime) / 1000);
+                  fetch('/api/user/progress/complete', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      level,
+                      moves: moves,
+                      time: timeElapsed,
+                    }),
+                  }).catch((error) => {
+                    console.error('Error saving progress:', error);
+                  });
+                }
+              }
               
               // Reset timers
               setStartTime(null);
               setElapsedTime(0);
-              
-              // Clear execution result after a brief delay to allow UI to show validation results
-              setTimeout(() => {
-                setExecutionResult(null);
-              }, 100);
             } else if (data.type === 'error') {
               setGameState((prev) => {
                 if (!prev) return prev;
@@ -387,9 +334,6 @@ solveMaze();`;
 
     return () => {
       clearTimeout(connectionTimeout);
-      if (lastFrameTimeoutRef.current) {
-        clearTimeout(lastFrameTimeoutRef.current);
-      }
       if (ws && ws.readyState === WebSocket.OPEN) {
         ws.close();
       }
@@ -399,12 +343,6 @@ solveMaze();`;
 
   const handleRunCode = async () => {
     if (!gameState) return;
-
-    // Clear any existing last frame timeout when starting new execution
-    if (lastFrameTimeoutRef.current) {
-      clearTimeout(lastFrameTimeoutRef.current);
-      lastFrameTimeoutRef.current = null;
-    }
 
     // Start timer for this attempt
     setStartTime(Date.now());
@@ -547,7 +485,6 @@ solveMaze();`;
           }
           
           // For HTTP fallback, show win modal immediately if goal reached
-          // (HTTP doesn't support deferred validation, so we'll validate on the server side)
           if (data.result.reachedGoal && !hasShownWinModal) {
             // Wait a bit for animations, then show modal
             setTimeout(() => {

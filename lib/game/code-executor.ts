@@ -1,14 +1,12 @@
 import { RobotController } from './robot';
 import type { GameState, ExecutionResult } from '../../types/game';
 import type { LevelRequirements } from './level-parser';
-import { validateRequirements } from './level-parser';
 
 export class CodeExecutor {
   private robot: RobotController;
   private gameState: GameState;
   private requirements?: LevelRequirements;
-  private executionCallbacks: Array<(data: any) => void> = [];
-  private lastOriginalCode?: string;
+  private messageCallbacks: Array<(data: any) => void> = [];
 
   constructor(gameState: GameState, requirements?: LevelRequirements) {
     this.gameState = gameState;
@@ -22,22 +20,20 @@ export class CodeExecutor {
     this.robot = new RobotController(this.gameState);
   }
 
-  onMove(callback: (data: any) => void) {
-    this.executionCallbacks.push(callback);
+  onMessage(callback: (data: any) => void) {
+    this.messageCallbacks.push(callback);
   }
 
   private emit(event: string, data: any) {
-    this.executionCallbacks.forEach((callback) => {
+    this.messageCallbacks.forEach((callback) => {
       callback({ type: event, ...data });
     });
   }
 
-  async execute(code: string, speed: number = 500): Promise<ExecutionResult> {
+  async execute(code: string, speed: number = 500): Promise<void> {
     // Reset robot to starting position before execution
     this.reset();
     const robot = this.robot;
-    // Store original code for requirements validation (will be used later)
-    this.lastOriginalCode = code;
     
     // Ensure speed is a valid number (in milliseconds)
     const executionSpeed = typeof speed === 'number' && speed > 0 ? speed : 500;
@@ -182,14 +178,36 @@ export class CodeExecutor {
         });
         wrappedCode = processedLines.join('\n');
       }
-      
+
       // Wrap in async IIFE to handle robot movement promises automatically
       // The IIFE returns a promise that resolves when all code completes
       wrappedCode = `
         (async function() {
-          ${wrappedCode}
+          ${wrappedCode};
+          await allDone();
         })();
       `;
+
+      const allDone = () => {
+        // Check if execution was successful (robot reached the goal)
+        // Don't validate requirements here - wait for UI to confirm animations are complete
+        const reachedGoal = robot.hasReached();
+        
+        const result: ExecutionResult = {
+          success: reachedGoal, // Will be updated after validation
+          message: reachedGoal
+            ? '✅ Robot reached the goal!'
+            : '❌ Robot did not reach the goal',
+          moves: robot.getMoves(),
+          reachedGoal: reachedGoal,
+          requirements: undefined, // Will be set during validation
+        };
+
+
+        // Log for debugging
+        console.log(`[CodeExecutor] All movements complete. Total: ${movementCount}, Final position:`, robot.getPosition(), 'Reached goal:', robot.hasReached());
+        this.emit('execution_complete', result);
+      };
 
       // Create execution context with robot API
       const context = {
@@ -199,8 +217,9 @@ export class CodeExecutor {
             this.emit('console_log', { message: args.join(' ') });
           },
         },
+        allDone: allDone,
       };
-
+      
       // Execute code with timeout
       // The server will keep sending robot_move frames until this promise resolves
       const executionPromise = (async () => {
@@ -209,10 +228,11 @@ export class CodeExecutor {
           const func = new Function(
             'robot',
             'console',
-            wrappedCode
+            'allDone',
+            wrappedCode,
           );
           // Execute user code (the IIFE returns a promise)
-          const result = func(context.robot, context.console);
+          const result = func(context.robot, context.console, context.allDone);
           // Wait for the IIFE promise to complete
           // This waits for all await calls in the user code to complete
           if (result && typeof result.then === 'function') {
@@ -239,41 +259,10 @@ export class CodeExecutor {
           
           // Additional delay to ensure the last movement's visualization animation is fully complete
           await delay(executionSpeed);
-          
-          // Log for debugging
-          console.log(`[CodeExecutor] All movements complete. Total: ${movementCount}, Final position:`, robot.getPosition(), 'Reached goal:', robot.hasReached());
         } catch (error: any) {
           throw error;
         }
       })();
-
-      // Wait for execution to complete (all movements finished)
-      // The server will keep sending robot_move frames until this resolves
-      await Promise.race([
-        executionPromise,
-        new Promise((_, reject) =>
-          setTimeout(() => reject(new Error('Execution timeout')), 30000)
-        ),
-      ]);
-
-      // Check if execution was successful (robot reached the goal)
-      // Don't validate requirements here - wait for UI to confirm animations are complete
-      const reachedGoal = robot.hasReached();
-      
-      const result: ExecutionResult = {
-        success: reachedGoal, // Will be updated after validation
-        message: reachedGoal
-          ? '✅ Robot reached the goal!'
-          : '❌ Robot did not reach the goal',
-        moves: robot.getMoves(),
-        reachedGoal: reachedGoal,
-        requirements: undefined, // Will be set during validation
-      };
-
-      // Note: execution_complete message removed - use validate_requirements instead
-      // The client will request validation after receiving all robot_move frames
-
-      return result;
     } catch (error: any) {
       const result: ExecutionResult = {
         success: false,
@@ -284,41 +273,8 @@ export class CodeExecutor {
       };
 
       this.emit('error', { message: error.message });
-      return result;
     }
   }
 
-  // Validate requirements after UI confirms animations are complete
-  // Also verifies that the robot is actually on the goal position
-  validateRequirements(): { passed: boolean; failures: string[]; reachedGoal: boolean } | undefined {
-    // First check if robot actually reached the goal
-    const reachedGoal = this.robot.hasReached();
-    
-    if (!this.requirements || !this.lastOriginalCode) {
-      // No requirements to validate, but still report goal status
-      return { passed: true, failures: [], reachedGoal };
-    }
-    
-    if (!reachedGoal) {
-      // Robot didn't reach goal - return failure
-      return {
-        passed: false,
-        failures: ['Robot did not reach the goal'],
-        reachedGoal: false,
-      };
-    }
-    
-    // Robot reached goal, now validate code requirements
-    const codeValidation = validateRequirements(
-      this.lastOriginalCode,
-      this.requirements,
-      this.robot.getMoves()
-    );
-    
-    return {
-      ...codeValidation,
-      reachedGoal: true,
-    };
-  }
 }
 

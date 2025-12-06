@@ -40,7 +40,11 @@ robot.moveDown()
 ## Boilerplate
 
 function solveMaze() {
-  
+  let i = 0;
+
+  for (i; i < 5; i++) {
+    robot.moveRight()
+  }
 }
 
 solveMaze();
