@@ -16,6 +16,9 @@ export function createWebSocketServer(port: number = 3001) {
   wss.on('connection', (ws) => {
     console.log('[WebSocket Server] Client connected');
 
+    // Store executor for validation requests
+    let currentExecutor: CodeExecutor | null = null;
+
     ws.on('message', async (message) => {
       try {
         const data = JSON.parse(message.toString());
@@ -25,10 +28,10 @@ export function createWebSocketServer(port: number = 3001) {
           const { code, gameState, speed, requirements } = data;
           
           // Create executor (this will reset the robot)
-          const executor = new CodeExecutor(gameState as GameState, requirements);
+          currentExecutor = new CodeExecutor(gameState as GameState, requirements);
           
           // Send updates via WebSocket in real-time
-          executor.onMove((eventData) => {
+          currentExecutor.onMove((eventData) => {
             if (ws.readyState === 1) { // WebSocket.OPEN
               try {
                 const message = JSON.stringify(eventData);
@@ -45,17 +48,13 @@ export function createWebSocketServer(port: number = 3001) {
           const executionSpeed = speed || gameState?.executionSpeed || 500;
           
           try {
-            const result = await executor.execute(code, executionSpeed);
+            // Execute code - this will keep sending robot_move frames until complete
+            // The execute() method will only return after ALL movements are done
+            // Note: execution_complete message removed - client will request validate_requirements instead
+            await currentExecutor.execute(code, executionSpeed);
             
-            // Send completion
-            if (ws.readyState === 1) {
-              const completionMessage = {
-                type: 'execution_complete',
-                result,
-              };
-              console.log('[WebSocket Server] Sending execution_complete:', JSON.stringify(completionMessage, null, 2));
-              ws.send(JSON.stringify(completionMessage));
-            }
+            // Execution complete - all robot_move frames have been sent
+            console.log('[WebSocket Server] Execution complete - all frames sent');
           } catch (error: any) {
             if (ws.readyState === 1) {
               const errorMessage = {
@@ -65,6 +64,20 @@ export function createWebSocketServer(port: number = 3001) {
               console.log('[WebSocket Server] Sending error:', JSON.stringify(errorMessage, null, 2));
               ws.send(JSON.stringify(errorMessage));
             }
+            currentExecutor = null;
+          }
+        } else if (data.type === 'validate_requirements') {
+          // UI requests validation after animations complete
+          // This validates both code requirements AND verifies robot reached goal
+          if (currentExecutor && ws.readyState === 1) {
+            const validation = currentExecutor.validateRequirements();
+            const validationMessage = {
+              type: 'requirements_validation',
+              validation,
+            };
+            console.log('[WebSocket Server] Sending requirements_validation:', JSON.stringify(validationMessage, null, 2));
+            ws.send(JSON.stringify(validationMessage));
+            currentExecutor = null; // Clear executor after validation
           }
         }
       } catch (error: any) {

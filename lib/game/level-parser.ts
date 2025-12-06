@@ -204,8 +204,9 @@ export function validateRequirements(
 
   // Check mustUseLoop (either for or while)
   if (requirements.mustUseLoop) {
-    const hasForLoop = /for\s*\(/.test(code);
-    const hasWhileLoop = /while\s*\(/.test(code);
+    // More robust regex: matches "for (" with optional whitespace, or "for("
+    const hasForLoop = /\bfor\s*\(/.test(code);
+    const hasWhileLoop = /\bwhile\s*\(/.test(code);
     if (!hasForLoop && !hasWhileLoop) {
       failures.push('Must use a loop (for or while)');
     }
@@ -213,7 +214,7 @@ export function validateRequirements(
 
   // Check mustUseWhile
   if (requirements.mustUseWhile) {
-    const hasWhileLoop = /while\s*\(/.test(code);
+    const hasWhileLoop = /\bwhile\s*\(/.test(code);
     if (!hasWhileLoop) {
       failures.push('Must use a while loop');
     }
@@ -221,7 +222,7 @@ export function validateRequirements(
 
   // Check mustUseFor
   if (requirements.mustUseFor) {
-    const hasForLoop = /for\s*\(/.test(code);
+    const hasForLoop = /\bfor\s*\(/.test(code);
     if (!hasForLoop) {
       failures.push('Must use a for loop');
     }

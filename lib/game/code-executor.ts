@@ -8,6 +8,7 @@ export class CodeExecutor {
   private gameState: GameState;
   private requirements?: LevelRequirements;
   private executionCallbacks: Array<(data: any) => void> = [];
+  private lastOriginalCode?: string;
 
   constructor(gameState: GameState, requirements?: LevelRequirements) {
     this.gameState = gameState;
@@ -35,8 +36,8 @@ export class CodeExecutor {
     // Reset robot to starting position before execution
     this.reset();
     const robot = this.robot;
-    // Store original code for requirements validation
-    const originalCode = code;
+    // Store original code for requirements validation (will be used later)
+    this.lastOriginalCode = code;
     
     // Ensure speed is a valid number (in milliseconds)
     const executionSpeed = typeof speed === 'number' && speed > 0 ? speed : 500;
@@ -45,12 +46,20 @@ export class CodeExecutor {
     const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
     
     // Queue system to ensure movements execute sequentially with delays
+    // This tracks the promise chain of all movements
     let movementQueue: Promise<boolean> = Promise.resolve(true);
+    let movementCount = 0; // Track number of movements queued
+    let pendingMovements = 0; // Track movements that are in progress
+    let codeExecutionComplete = false; // Track if the code execution (IIFE) has completed
     
     // Helper to queue a movement - returns a promise that resolves after visualization
     const queueMovement = async (movementFn: () => boolean, direction: string, functionName: string): Promise<boolean> => {
       // Log server-side only
       console.log(`robot.${functionName}`);
+      
+      // Increment movement counter and pending movements
+      movementCount++;
+      pendingMovements++;
       
       // Wait for previous movements to complete visualization first
       await movementQueue;
@@ -60,6 +69,7 @@ export class CodeExecutor {
       
       // Create a promise for this movement's visualization
       const visualizationPromise = (async () => {
+        
         // Emit robot_move event for game state updates (without message)
         this.emit('robot_move', {
           position: robot.getPosition(),
@@ -70,13 +80,19 @@ export class CodeExecutor {
         // Add delay for real-time visualization - use executionSpeed
         await delay(executionSpeed);
         
+        // Decrement pending movements when this one completes
+        pendingMovements--;
+        
         return moved;
       })();
       
       // Update the queue to track this movement's completion
+      // IMPORTANT: We update movementQueue BEFORE awaiting, so the next movement
+      // can start waiting, but we still await this one to ensure it completes
       movementQueue = visualizationPromise;
       
       // Wait for this movement's visualization to complete
+      // This ensures the IIFE only continues after this movement is fully visualized
       await visualizationPromise;
       
       // Return the actual result of the movement
@@ -146,9 +162,29 @@ export class CodeExecutor {
       // If solveMaze is defined but not called, add the call (with await since it's now async)
       if (hasSolveMazeDef && !hasSolveMazeCall) {
         wrappedCode = `${wrappedCode}\n\nawait solveMaze();`;
+      } else if (hasSolveMazeDef && hasSolveMazeCall) {
+        // If solveMaze is called but not awaited, add await
+        // This ensures the IIFE waits for solveMaze to complete
+        // Process line by line to avoid matching function definitions
+        const lines = wrappedCode.split('\n');
+        const processedLines = lines.map((line) => {
+          // Skip lines that contain function definitions
+          if (/(async\s+)?function\s+solveMaze\s*\(/.test(line)) {
+            return line;
+          }
+          // For other lines, add await before solveMaze() if not already present
+          return line.replace(
+            /(\s|^)(await\s+)?solveMaze\s*\(/g,
+            (match, prefix, awaitKeyword) => {
+              return awaitKeyword ? match : `${prefix}await solveMaze(`;
+            }
+          );
+        });
+        wrappedCode = processedLines.join('\n');
       }
       
       // Wrap in async IIFE to handle robot movement promises automatically
+      // The IIFE returns a promise that resolves when all code completes
       wrappedCode = `
         (async function() {
           ${wrappedCode}
@@ -166,6 +202,7 @@ export class CodeExecutor {
       };
 
       // Execute code with timeout
+      // The server will keep sending robot_move frames until this promise resolves
       const executionPromise = (async () => {
         try {
           // Use Function constructor for sandboxing (in production, use vm2 or similar)
@@ -174,21 +211,44 @@ export class CodeExecutor {
             'console',
             wrappedCode
           );
-          // Execute user code (synchronously, but movements are queued)
+          // Execute user code (the IIFE returns a promise)
           const result = func(context.robot, context.console);
           // Wait for the IIFE promise to complete
+          // This waits for all await calls in the user code to complete
           if (result && typeof result.then === 'function') {
             await result;
+          } else {
+            // If result is not a promise, wait a bit for any async operations to start
+            await delay(100);
           }
-          // Wait for all queued movements to complete
+          
+          // Mark that code execution (IIFE) has completed
+          // This allows us to identify the last frame
+          codeExecutionComplete = true;
+          
+          // CRITICAL: Wait for ALL movements to complete
+          // The movementQueue tracks the last movement's visualization promise
+          // We must wait for this to ensure all robot_move frames have been sent
           await movementQueue;
-          // Small delay to ensure all messages are sent
-          await delay(100);
+          
+          // Wait for any pending movements to complete
+          // Keep waiting until all movements are done (no early exit)
+          while (pendingMovements > 0) {
+            await delay(50);
+          }
+          
+          // Additional delay to ensure the last movement's visualization animation is fully complete
+          await delay(executionSpeed);
+          
+          // Log for debugging
+          console.log(`[CodeExecutor] All movements complete. Total: ${movementCount}, Final position:`, robot.getPosition(), 'Reached goal:', robot.hasReached());
         } catch (error: any) {
           throw error;
         }
       })();
 
+      // Wait for execution to complete (all movements finished)
+      // The server will keep sending robot_move frames until this resolves
       await Promise.race([
         executionPromise,
         new Promise((_, reject) =>
@@ -196,27 +256,22 @@ export class CodeExecutor {
         ),
       ]);
 
-      // Validate requirements if level was completed
-      let requirementsValidation;
-      if (robot.hasReached()) {
-        requirementsValidation = validateRequirements(
-          originalCode,
-          this.requirements,
-          robot.getMoves()
-        );
-      }
-
+      // Check if execution was successful (robot reached the goal)
+      // Don't validate requirements here - wait for UI to confirm animations are complete
+      const reachedGoal = robot.hasReached();
+      
       const result: ExecutionResult = {
-        success: robot.hasReached(),
-        message: robot.hasReached()
-          ? '✅ Success! Robot reached the goal!'
+        success: reachedGoal, // Will be updated after validation
+        message: reachedGoal
+          ? '✅ Robot reached the goal!'
           : '❌ Robot did not reach the goal',
         moves: robot.getMoves(),
-        reachedGoal: robot.hasReached(),
-        requirements: requirementsValidation,
+        reachedGoal: reachedGoal,
+        requirements: undefined, // Will be set during validation
       };
 
-      this.emit('execution_complete', result);
+      // Note: execution_complete message removed - use validate_requirements instead
+      // The client will request validation after receiving all robot_move frames
 
       return result;
     } catch (error: any) {
@@ -231,6 +286,39 @@ export class CodeExecutor {
       this.emit('error', { message: error.message });
       return result;
     }
+  }
+
+  // Validate requirements after UI confirms animations are complete
+  // Also verifies that the robot is actually on the goal position
+  validateRequirements(): { passed: boolean; failures: string[]; reachedGoal: boolean } | undefined {
+    // First check if robot actually reached the goal
+    const reachedGoal = this.robot.hasReached();
+    
+    if (!this.requirements || !this.lastOriginalCode) {
+      // No requirements to validate, but still report goal status
+      return { passed: true, failures: [], reachedGoal };
+    }
+    
+    if (!reachedGoal) {
+      // Robot didn't reach goal - return failure
+      return {
+        passed: false,
+        failures: ['Robot did not reach the goal'],
+        reachedGoal: false,
+      };
+    }
+    
+    // Robot reached goal, now validate code requirements
+    const codeValidation = validateRequirements(
+      this.lastOriginalCode,
+      this.requirements,
+      this.robot.getMoves()
+    );
+    
+    return {
+      ...codeValidation,
+      reachedGoal: true,
+    };
   }
 }
 

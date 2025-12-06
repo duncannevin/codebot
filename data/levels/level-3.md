@@ -13,7 +13,7 @@ Navigate around a wall to reach the goal. This teaches you about obstacles and p
 ## Gameboard
 
 r***
-*w**
+www*
 ***g
 ****
 

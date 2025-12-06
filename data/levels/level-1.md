@@ -14,7 +14,7 @@ This is your first step into coding! Just tell the robot where to go.
 
 ## Gameboard
 
-r**g
+*r*g
 ****
 ****
 ****
