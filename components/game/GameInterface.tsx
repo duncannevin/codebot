@@ -179,11 +179,15 @@ solveMaze();`;
     let connectionTimeout: NodeJS.Timeout;
     
     const connectWebSocket = () => {
-      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-      // Try connecting to a separate WebSocket server on port 3001 for development
-      const wsUrl = process.env.NODE_ENV === 'development' 
-        ? 'ws://localhost:3001'
-        : `${protocol}//${window.location.host}/api/game/ws`;
+      // Only try WebSocket in development
+      // Vercel serverless functions don't support WebSockets
+      if (process.env.NODE_ENV !== 'development') {
+        console.log('[WebSocket Client] Skipping WebSocket in production, will use HTTP fallback');
+        return;
+      }
+      
+      // In development, connect to local WebSocket server on port 3001
+      const wsUrl = 'ws://localhost:3001';
       
       try {
         console.log('[WebSocket Client] Attempting to connect to:', wsUrl);
