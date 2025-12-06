@@ -39,8 +39,6 @@ robot.isWall(direction)   // Check if there's a wall in a direction
 robot.atGoal()            // Check if robot has reached the goal
 ```
 
-**Important**: Always use `await` before movement functions! This ensures the robot moves one step at a time.
-
 ### Example Solution
 
 Here's how you might solve a simple level:
@@ -48,8 +46,8 @@ Here's how you might solve a simple level:
 ```javascript
 function solveMaze() {
     // Move right twice to reach the goal
-    await robot.moveRight();
-    await robot.moveRight();
+    robot.moveRight();
+    robot.moveRight();
 }
 
 solveMaze();
