@@ -51,10 +51,10 @@ export async function POST(request: NextRequest) {
     }
 
     // Use HTTPCodeExecutor for immediate frame collection
-    const executor = new HTTPCodeExecutor(gameState, requirements);
+    const executor = new HTTPCodeExecutor(gameState, requirements, user.id, levelId ? parseInt(levelId) : undefined);
 
     // Execute code and get all events immediately
-    const { events, result } = executor.execute(code);
+    const { events, result } = await executor.execute(code);
 
     return NextResponse.json({
       success: true,

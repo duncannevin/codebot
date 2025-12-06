@@ -1,6 +1,7 @@
 import { RobotController } from './robot';
 import type { GameState, ExecutionResult } from '../../types/game';
 import type { LevelRequirements } from './level-parser';
+import { updateLevelCompletion } from '../db/user-progress';
 
 /**
  * HTTPCodeExecutor - A simplified executor for HTTP requests
@@ -12,17 +13,31 @@ export class HTTPCodeExecutor {
   private gameState: GameState;
   private requirements?: LevelRequirements;
   private events: any[] = [];
+  private userId?: string;
+  private level?: number;
+  private executionStartTime?: number;
 
-  constructor(gameState: GameState, requirements?: LevelRequirements) {
+  constructor(
+    gameState: GameState, 
+    requirements?: LevelRequirements,
+    userId?: string,
+    level?: number
+  ) {
     this.gameState = gameState;
     this.requirements = requirements;
+    this.userId = userId;
+    this.level = level;
     this.robot = new RobotController(gameState);
+  }
+
+  setExecutionStartTime(startTime: number) {
+    this.executionStartTime = startTime;
   }
 
   /**
    * Execute code and return all events immediately
    */
-  execute(code: string): { events: any[]; result: ExecutionResult } {
+  async execute(code: string): Promise<{ events: any[]; result: ExecutionResult }> {
     // Reset robot to starting position
     this.robot = new RobotController(this.gameState);
     this.events = [];
@@ -79,12 +94,28 @@ export class HTTPCodeExecutor {
 
       // Create final result
       const reachedGoal = robot.hasReached();
+      const moves = robot.getMoves();
+      const executionTime = this.executionStartTime 
+        ? Math.floor((Date.now() - this.executionStartTime) / 1000)
+        : 0;
+      
+      // Update database if level was completed successfully
+      if (reachedGoal && this.userId && this.level) {
+        try {
+          await updateLevelCompletion(this.userId, this.level, moves, executionTime);
+          console.log(`[HTTPCodeExecutor] Level ${this.level} completion saved to database`);
+        } catch (error) {
+          console.error('[HTTPCodeExecutor] Error updating level completion:', error);
+          // Continue even if database update fails
+        }
+      }
+      
       const executionResult: ExecutionResult = {
         success: reachedGoal,
         message: reachedGoal
           ? '✅ Robot reached the goal!'
           : '❌ Robot did not reach the goal',
-        moves: robot.getMoves(),
+        moves: moves,
         reachedGoal: reachedGoal,
         requirements: undefined,
       };

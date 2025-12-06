@@ -32,10 +32,17 @@ export async function GET(
     const progress = await getUserProgress(user.id);
     const currentLevel = progress?.current_level || 1;
 
-    // Users can only access levels up to their current level
+    // Users can access levels up to and including their current level
+    // current_level represents the highest unlocked level (last completed + 1)
+    // If current_level is 7, user can access levels 1-7
     if (levelNumber > currentLevel) {
       return NextResponse.json(
-        { error: 'Level not yet unlocked. Complete previous levels to unlock this level.' },
+        { 
+          error: 'Level not yet unlocked. Complete previous levels to unlock this level.',
+          currentLevel,
+          requestedLevel: levelNumber,
+          completedLevels: progress?.completed_levels || []
+        },
         { status: 403 }
       );
     }

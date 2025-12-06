@@ -83,11 +83,8 @@ export default function GameInterface({ user, initialLevel }: GameInterfaceProps
         setLevelData(data);
         setGameState(data.gameState);
         // Use boilerplate if available, otherwise use default template
-        const initialCode = data.boilerplate || `function solveMaze() {
-  
-}
+        const initialCode = data.boilerplate || '';
 
-solveMaze();`;
         setCode(initialCode);
         setConsoleOutput([]);
         setShowWinModal(false);
@@ -449,11 +446,8 @@ solveMaze();`;
                 setElapsedTime(Math.floor((Date.now() - startTime) / 1000));
               }
               
-              // Show win modal when goal is reached
-              if (event.reachedGoal && !hasShownWinModal) {
-                setShowWinModal(true);
-                setHasShownWinModal(true);
-              }
+              // Don't show win modal here in HTTP mode - wait for execution_complete
+              // Just update the robot state
             } else if (event.type === 'execution_complete') {
               // Handle execution completion
               const { success, message, moves, reachedGoal } = event;
@@ -494,7 +488,7 @@ solveMaze();`;
                 });
               }
               
-              // Show win modal if robot reached goal
+              // Show win modal and save progress if robot reached goal
               if (reachedGoal && success && !hasShownWinModal) {
                 // Wait a bit for animations, then show modal
                 await new Promise((resolve) => setTimeout(resolve, gameState?.executionSpeed || 500));
@@ -504,17 +498,34 @@ solveMaze();`;
                 // Save progress when level is completed
                 if (gameState && startTime) {
                   const timeElapsed = Math.floor((Date.now() - startTime) / 1000);
-                  fetch('/api/user/progress/complete', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                      level,
-                      moves: moves,
-                      time: timeElapsed,
-                    }),
-                  }).catch((error) => {
+                  try {
+                    const response = await fetch('/api/user/progress/complete', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({
+                        level,
+                        moves: moves,
+                        time: timeElapsed,
+                      }),
+                    });
+                    
+                    if (!response.ok) {
+                      const error = await response.json();
+                      console.error('Error saving progress:', error);
+                    } else {
+                      console.log('Level completion saved successfully');
+                      // Refresh user progress to update maxUnlockedLevel
+                      const progressResponse = await fetch('/api/user/progress');
+                      if (progressResponse.ok) {
+                        const progressData = await progressResponse.json();
+                        if (progressData.current_level) {
+                          setMaxUnlockedLevel(progressData.current_level);
+                        }
+                      }
+                    }
+                  } catch (error) {
                     console.error('Error saving progress:', error);
-                  });
+                  }
                 }
               }
               

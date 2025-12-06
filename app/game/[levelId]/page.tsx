@@ -29,8 +29,8 @@ export default async function GamePage({
   const progress = await getUserProgress(user.id);
   const currentLevel = progress?.current_level || 1;
 
-  // Users can only access levels up to their current level
-  // Allow access to level 1 even if current_level is 1 (they're on level 1)
+  // Users can access levels up to and including their current level
+  // current_level represents the highest unlocked level (last completed + 1)
   if (levelNumber > currentLevel) {
     // Redirect to their current level
     redirect(`/game/${currentLevel}`);

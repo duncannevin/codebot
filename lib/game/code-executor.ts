@@ -1,18 +1,33 @@
 import { RobotController } from './robot';
 import type { GameState, ExecutionResult } from '../../types/game';
 import type { LevelRequirements } from './level-parser';
+import { updateLevelCompletion } from '../db/user-progress';
 
 export class CodeExecutor {
   private robot: RobotController;
   private gameState: GameState;
   private requirements?: LevelRequirements;
   private messageCallbacks: Array<(data: any) => void> = [];
+  private userId?: string;
+  private level?: number;
+  private executionStartTime?: number;
 
-  constructor(gameState: GameState, requirements?: LevelRequirements) {
+  constructor(
+    gameState: GameState, 
+    requirements?: LevelRequirements,
+    userId?: string,
+    level?: number
+  ) {
     this.gameState = gameState;
     this.requirements = requirements;
+    this.userId = userId;
+    this.level = level;
     // Create a fresh robot controller for each execution
     this.robot = new RobotController(gameState);
+  }
+
+  setExecutionStartTime(startTime: number) {
+    this.executionStartTime = startTime;
   }
 
   reset() {
@@ -40,6 +55,9 @@ export class CodeExecutor {
     // Reset robot to starting position before execution
     this.reset();
     const robot = this.robot;
+    
+    // Set execution start time for database updates
+    this.executionStartTime = Date.now();
     
     // Ensure speed is a valid number (in milliseconds)
     const executionSpeed = typeof speed === 'number' && speed > 0 ? speed : 500;
@@ -197,21 +215,37 @@ export class CodeExecutor {
         })();
       `;
 
-      const allDone = () => {
+      const allDone = async () => {
         // Check if execution was successful (robot reached the goal)
         // Don't validate requirements here - wait for UI to confirm animations are complete
         const reachedGoal = robot.hasReached();
+        const moves = robot.getMoves();
+        
+        // Calculate execution time
+        const executionTime = this.executionStartTime 
+          ? Math.floor((Date.now() - this.executionStartTime) / 1000)
+          : 0;
+        
+        // Update database if level was completed successfully
+        if (reachedGoal && this.userId && this.level) {
+          try {
+            await updateLevelCompletion(this.userId, this.level, moves, executionTime);
+            console.log(`[CodeExecutor] Level ${this.level} completion saved to database`);
+          } catch (error) {
+            console.error('[CodeExecutor] Error updating level completion:', error);
+            // Continue even if database update fails
+          }
+        }
         
         const result: ExecutionResult = {
           success: reachedGoal, // Will be updated after validation
           message: reachedGoal
             ? '✅ Robot reached the goal!'
             : '❌ Robot did not reach the goal',
-          moves: robot.getMoves(),
+          moves: moves,
           reachedGoal: reachedGoal,
           requirements: undefined, // Will be set during validation
         };
-
 
         // Log for debugging
         console.log(`[CodeExecutor] All movements complete. Total: ${movementCount}, Final position:`, robot.getPosition(), 'Reached goal:', robot.hasReached());
