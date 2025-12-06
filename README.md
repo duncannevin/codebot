@@ -28,10 +28,10 @@ Control your robot using these functions:
 
 ```javascript
 // Movement functions
-await robot.moveUp()      // Move robot up one cell
-await robot.moveDown()    // Move robot down one cell
-await robot.moveLeft()    // Move robot left one cell
-await robot.moveRight()   // Move robot right one cell
+robot.moveUp()      // Move robot up one cell
+robot.moveDown()    // Move robot down one cell
+robot.moveLeft()    // Move robot left one cell
+robot.moveRight()   // Move robot right one cell
 
 // Sensing functions
 robot.canMove(direction)  // Check if robot can move in a direction ('up', 'down', 'left', 'right')
