@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { CodeExecutor } from '@/lib/game/code-executor';
+import { HTTPCodeExecutor } from '@/lib/game/http-code-executor';
 import { GameState } from '@/types/game';
 import { loadLevel } from '@/lib/game/level-parser';
 
@@ -50,22 +50,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const executor = new CodeExecutor(gameState, requirements);
+    // Use HTTPCodeExecutor for immediate frame collection
+    const executor = new HTTPCodeExecutor(gameState, requirements);
 
-    // Store execution events
-    const events: any[] = [];
-
-    executor.onMessage((data) => {
-      events.push(data);
-    });
-
-    // Execute code with speed from request or default to gameState speed
-    const executionSpeed = speed || gameState.executionSpeed || 500;
-    await executor.execute(code, executionSpeed);
+    // Execute code and get all events immediately
+    const { events, result } = executor.execute(code);
 
     return NextResponse.json({
       success: true,
       events,
+      result,
     });
   } catch (error: any) {
     console.error('Execution error:', error);

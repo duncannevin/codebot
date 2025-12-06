@@ -424,11 +424,13 @@ solveMaze();`;
         
         // Process events with delays for visualization (HTTP fallback)
         if (data.events && data.events.length > 0) {
+          console.log(`[HTTP Client] Processing ${data.events.length} events`);
+          
           for (const event of data.events) {
-            // Small delay to show movement animation
-            await new Promise((resolve) => setTimeout(resolve, gameState?.executionSpeed || 500));
-            
             if (event.type === 'robot_move') {
+              // Small delay to show movement animation
+              await new Promise((resolve) => setTimeout(resolve, gameState?.executionSpeed || 500));
+              
               setGameState((prev) => {
                 if (!prev) return prev;
                 return {
@@ -441,77 +443,97 @@ solveMaze();`;
                   moves: event.moves,
                 };
               });
+              
               // Update elapsed time
               if (startTime) {
                 setElapsedTime(Math.floor((Date.now() - startTime) / 1000));
               }
-              // Don't add message to console output - logs are local only
+              
               // Show win modal when goal is reached
               if (event.reachedGoal && !hasShownWinModal) {
                 setShowWinModal(true);
                 setHasShownWinModal(true);
               }
-            }
-          }
-        }
-
-        // Show final result
-        if (data.result) {
-          setConsoleOutput((prev) => [...prev, data.result.message]);
-          setGameState((prev) => {
-            if (!prev) return prev;
-            return {
-              ...prev,
-              isExecuting: false,
-              robot: {
-                ...prev.robot,
-                hasReachedGoal: data.result.reachedGoal,
-              },
-            };
-          });
-          
-          // Save stats when execution completes
-          if (gameState && startTime) {
-            const timeElapsed = Math.floor((Date.now() - startTime) / 1000);
-            // Save current stats
-            fetch('/api/user/progress/stats', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                level,
-                moves: gameState.moves,
-                time: timeElapsed,
-                incrementAttempts: false,
-              }),
-            }).catch((error) => {
-              console.error('Error saving stats:', error);
-            });
-          }
-          
-          // For HTTP fallback, show win modal immediately if goal reached
-          if (data.result.reachedGoal && !hasShownWinModal) {
-            // Wait a bit for animations, then show modal
-            setTimeout(() => {
-              setShowWinModal(true);
-              setHasShownWinModal(true);
-              // Save progress when level is completed
+            } else if (event.type === 'execution_complete') {
+              // Handle execution completion
+              const { success, message, moves, reachedGoal } = event;
+              
+              // Stop execution
+              setGameState((prev) => {
+                if (!prev) return prev;
+                return {
+                  ...prev,
+                  isExecuting: false,
+                  robot: {
+                    ...prev.robot,
+                    hasReachedGoal: reachedGoal || false,
+                  },
+                  moves: moves,
+                };
+              });
+              
+              // Add result message to console
+              if (message) {
+                setConsoleOutput((prev) => [...prev, message]);
+              }
+              
+              // Save stats when execution completes
               if (gameState && startTime) {
                 const timeElapsed = Math.floor((Date.now() - startTime) / 1000);
-                fetch('/api/user/progress/complete', {
+                fetch('/api/user/progress/stats', {
                   method: 'POST',
                   headers: { 'Content-Type': 'application/json' },
                   body: JSON.stringify({
                     level,
-                    moves: gameState.moves,
+                    moves: moves,
                     time: timeElapsed,
+                    incrementAttempts: false,
                   }),
                 }).catch((error) => {
-                  console.error('Error saving progress:', error);
+                  console.error('Error saving stats:', error);
                 });
               }
-            }, 500);
+              
+              // Show win modal if robot reached goal
+              if (reachedGoal && success && !hasShownWinModal) {
+                // Wait a bit for animations, then show modal
+                await new Promise((resolve) => setTimeout(resolve, gameState?.executionSpeed || 500));
+                setShowWinModal(true);
+                setHasShownWinModal(true);
+                
+                // Save progress when level is completed
+                if (gameState && startTime) {
+                  const timeElapsed = Math.floor((Date.now() - startTime) / 1000);
+                  fetch('/api/user/progress/complete', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      level,
+                      moves: moves,
+                      time: timeElapsed,
+                    }),
+                  }).catch((error) => {
+                    console.error('Error saving progress:', error);
+                  });
+                }
+              }
+              
+              // Reset timers
+              setStartTime(null);
+              setElapsedTime(0);
+            } else if (event.type === 'error') {
+              setGameState((prev) => {
+                if (!prev) return prev;
+                return { ...prev, isExecuting: false };
+              });
+              setConsoleOutput((prev) => [...prev, `Error: ${event.message}`]);
+            } else if (event.type === 'console_log') {
+              setConsoleOutput((prev) => [...prev, event.message]);
+            }
           }
         } else {
+          // No events received - this shouldn't happen, but handle gracefully
+          console.warn('[HTTP Client] No events received');
           setGameState((prev) => {
             if (!prev) return prev;
             return { ...prev, isExecuting: false };

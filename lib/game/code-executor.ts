@@ -25,7 +25,13 @@ export class CodeExecutor {
   }
 
   private emit(event: string, data: any) {
-    this.messageCallbacks.forEach((callback) => {
+    console.log(`[CodeExecutor] Emitting event: ${event}`, {
+      type: event,
+      ...data,
+      callbackCount: this.messageCallbacks.length
+    });
+    this.messageCallbacks.forEach((callback, index) => {
+      console.log(`[CodeExecutor] Calling callback ${index}`);
       callback({ type: event, ...data });
     });
   }
@@ -51,7 +57,7 @@ export class CodeExecutor {
     // Helper to queue a movement - returns a promise that resolves after visualization
     const queueMovement = async (movementFn: () => boolean, direction: string, functionName: string): Promise<boolean> => {
       // Log server-side only
-      console.log(`robot.${functionName}`);
+      console.log(`[CodeExecutor] queueMovement called: robot.${functionName} (movementCount: ${movementCount})`);
       
       // Increment movement counter and pending movements
       movementCount++;
@@ -62,14 +68,17 @@ export class CodeExecutor {
       
       // Now execute the movement (position updates here)
       const moved = movementFn();
+      console.log(`[CodeExecutor] Movement executed: ${moved}, position:`, robot.getPosition());
       
       // Emit robot_move event immediately after movement (synchronously)
       // This ensures the event is captured before any async operations
+      console.log(`[CodeExecutor] About to emit robot_move event`);
       this.emit('robot_move', {
         position: robot.getPosition(),
         moves: robot.getMoves(),
         reachedGoal: robot.hasReached(),
       });
+      console.log(`[CodeExecutor] robot_move event emitted`);
       
       // Create a promise for this movement's visualization delay
       const visualizationPromise = (async () => {
@@ -263,6 +272,10 @@ export class CodeExecutor {
           throw error;
         }
       })();
+      
+      // CRITICAL: Await the execution promise to ensure all events are emitted
+      await executionPromise;
+      
     } catch (error: any) {
       const result: ExecutionResult = {
         success: false,
