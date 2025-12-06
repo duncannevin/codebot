@@ -5,9 +5,10 @@ import { GameState } from '@/types/game';
 
 interface MazeArenaProps {
   gameState: GameState;
+  title?: string;
 }
 
-export default function MazeArena({ gameState }: MazeArenaProps) {
+export default function MazeArena({ gameState, title }: MazeArenaProps) {
   const { maze, robot, goal } = gameState;
   const cellSize = 70;
 
@@ -26,7 +27,7 @@ export default function MazeArena({ gameState }: MazeArenaProps) {
 
   return (
     <div className="rounded-xl border border-gray-200 bg-white p-6">
-      <h2 className="mb-4 text-center text-lg font-bold text-slate-800">Maze Arena</h2>
+      <h2 className="mb-4 text-center text-lg font-bold text-slate-800">{title || 'Maze Arena'}</h2>
       
       <div className="mx-auto rounded-lg border border-gray-200 bg-slate-50 p-4">
         <div className="relative" style={{ width: maze[0].length * cellSize, height: maze.length * cellSize }}>

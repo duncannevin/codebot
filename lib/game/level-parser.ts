@@ -2,13 +2,25 @@ import { GameState, Position, CellType } from '../../types/game';
 import fs from 'fs';
 import path from 'path';
 
+export interface LevelRequirements {
+  maxMoves?: number;
+  mustUseLoop?: boolean;
+  mustUseFunction?: boolean;
+  mustUseConditional?: boolean;
+  mustUseWhile?: boolean;
+  mustUseFor?: boolean;
+}
+
 export interface LevelData {
   order: number;
+  title?: string;
   objective: string;
   gameboard: string[];
   tip: string;
   availableFunctions: string[];
   hints: string[];
+  boilerplate?: string;
+  requirements?: LevelRequirements;
 }
 
 export interface ParsedLevel extends LevelData {
@@ -24,6 +36,8 @@ export function parseLevelMarkdown(content: string): LevelData {
     gameboard: [],
     availableFunctions: [],
     hints: [],
+    boilerplate: '',
+    requirements: {},
   };
 
   let currentSection = '';
@@ -40,6 +54,9 @@ export function parseLevelMarkdown(content: string): LevelData {
         switch (currentSection) {
           case 'Order':
             data.order = parseInt(content);
+            break;
+          case 'Title':
+            data.title = content;
             break;
           case 'Objective':
             data.objective = content;
@@ -60,14 +77,26 @@ export function parseLevelMarkdown(content: string): LevelData {
               .filter((l) => l.trim().length > 0)
               .map((l) => l.trim().replace(/^\d+\)\s*/, ''));
             break;
+          case 'Boilerplate':
+            data.boilerplate = sectionContent.join('\n').trim();
+            break;
+          case 'Requirements':
+            data.requirements = parseRequirements(sectionContent);
+            break;
         }
       }
 
       // Start new section
       currentSection = trimmed.replace('## ', '').trim();
       sectionContent = [];
-    } else if (currentSection && trimmed.length > 0) {
-      sectionContent.push(line);
+    } else if (currentSection) {
+      // For Boilerplate section, preserve all lines including empty ones for code formatting
+      // For other sections, only add non-empty lines
+      if (currentSection === 'Boilerplate') {
+        sectionContent.push(line);
+      } else if (trimmed.length > 0) {
+        sectionContent.push(line);
+      }
     }
   }
 
@@ -77,6 +106,9 @@ export function parseLevelMarkdown(content: string): LevelData {
     switch (currentSection) {
       case 'Order':
         data.order = parseInt(content);
+        break;
+      case 'Title':
+        data.title = content;
         break;
       case 'Objective':
         data.objective = content;
@@ -97,10 +129,129 @@ export function parseLevelMarkdown(content: string): LevelData {
           .filter((l) => l.trim().length > 0)
           .map((l) => l.trim().replace(/^\d+\)\s*/, ''));
         break;
+      case 'Boilerplate':
+        data.boilerplate = sectionContent.join('\n').trim();
+        break;
+      case 'Requirements':
+        data.requirements = parseRequirements(sectionContent);
+        break;
     }
   }
 
   return data as LevelData;
+}
+
+/**
+ * Parse requirements from section content
+ */
+function parseRequirements(sectionContent: string[]): LevelRequirements {
+  const requirements: LevelRequirements = {};
+  
+  for (const line of sectionContent) {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith('#')) continue;
+    
+    // Parse key: value format
+    const match = trimmed.match(/^(\w+):\s*(.+)$/);
+    if (match) {
+      const key = match[1];
+      const value = match[2].trim();
+      
+      switch (key) {
+        case 'maxMoves':
+          requirements.maxMoves = parseInt(value);
+          break;
+        case 'mustUseLoop':
+          requirements.mustUseLoop = value.toLowerCase() === 'true';
+          break;
+        case 'mustUseFunction':
+          requirements.mustUseFunction = value.toLowerCase() === 'true';
+          break;
+        case 'mustUseConditional':
+          requirements.mustUseConditional = value.toLowerCase() === 'true';
+          break;
+        case 'mustUseWhile':
+          requirements.mustUseWhile = value.toLowerCase() === 'true';
+          break;
+        case 'mustUseFor':
+          requirements.mustUseFor = value.toLowerCase() === 'true';
+          break;
+      }
+    }
+  }
+  
+  return requirements;
+}
+
+/**
+ * Validate code against level requirements
+ */
+export function validateRequirements(
+  code: string,
+  requirements: LevelRequirements | undefined,
+  moves: number
+): { passed: boolean; failures: string[] } {
+  if (!requirements) {
+    return { passed: true, failures: [] };
+  }
+
+  const failures: string[] = [];
+
+  // Check maxMoves
+  if (requirements.maxMoves !== undefined && moves > requirements.maxMoves) {
+    failures.push(`Used ${moves} moves, but maximum allowed is ${requirements.maxMoves}`);
+  }
+
+  // Check mustUseLoop (either for or while)
+  if (requirements.mustUseLoop) {
+    const hasForLoop = /for\s*\(/.test(code);
+    const hasWhileLoop = /while\s*\(/.test(code);
+    if (!hasForLoop && !hasWhileLoop) {
+      failures.push('Must use a loop (for or while)');
+    }
+  }
+
+  // Check mustUseWhile
+  if (requirements.mustUseWhile) {
+    const hasWhileLoop = /while\s*\(/.test(code);
+    if (!hasWhileLoop) {
+      failures.push('Must use a while loop');
+    }
+  }
+
+  // Check mustUseFor
+  if (requirements.mustUseFor) {
+    const hasForLoop = /for\s*\(/.test(code);
+    if (!hasForLoop) {
+      failures.push('Must use a for loop');
+    }
+  }
+
+  // Check mustUseFunction (custom function, not solveMaze)
+  if (requirements.mustUseFunction) {
+    // Count function definitions, excluding solveMaze
+    const functionMatches = code.match(/function\s+(\w+)\s*\(/g) || [];
+    const customFunctions = functionMatches.filter(
+      (match) => !match.includes('solveMaze')
+    );
+    if (customFunctions.length === 0) {
+      failures.push('Must define and use a custom function');
+    }
+  }
+
+  // Check mustUseConditional
+  if (requirements.mustUseConditional) {
+    const hasIf = /if\s*\(/.test(code);
+    const hasTernary = /\?.*:/.test(code);
+    if (!hasIf && !hasTernary) {
+      failures.push('Must use conditional logic (if/else)');
+    }
+  }
+
+  return {
+    passed: failures.length === 0,
+    failures,
+  };
 }
 
 /**

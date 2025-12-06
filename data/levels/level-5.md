@@ -2,6 +2,10 @@
 
 5
 
+## Title
+
+Zigzag Master 🎯
+
 ## Objective
 
 Use a loop to move the robot to the goal position (🎯)
@@ -10,14 +14,12 @@ Bonus: Complete in under 10 moves!
 
 ## Gameboard
 
-**w**w**
-**w**w**
-**wr*w**
-w****w**
-**ww*w**
-*****w**
-*****w**
-***g*w**
+r*w*w*
+**w*w*
+**w*w*
+**w*w*
+**w*w*
+***g**
 
 ## Tip
 
@@ -39,3 +41,15 @@ robot.atGoal()
 2) Try to write a reusable function
 3) Look for patterns
 
+## Boilerplate
+
+function solveMaze() {
+  
+}
+
+solveMaze();
+
+## Requirements
+
+maxMoves: 10
+mustUseLoop: true

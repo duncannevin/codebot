@@ -2,6 +2,10 @@
 
 1
 
+## Title
+
+First Steps 🚀
+
 ## Objective
 
 Move the robot to the goal position (🎯) by calling robot.moveRight() twice.
@@ -10,14 +14,10 @@ This is your first step into coding! Just tell the robot where to go.
 
 ## Gameboard
 
-r*****g
-********
-********
-********
-********
-********
-********
-********
+r**g
+****
+****
+****
 
 ## Tip
 
@@ -37,3 +37,10 @@ robot.moveDown()
 2) You'll need to call it twice to reach the goal
 3) Don't forget to use await before each movement!
 
+## Boilerplate
+
+function solveMaze() {
+    // your solution goes here!
+}
+
+solveMaze();

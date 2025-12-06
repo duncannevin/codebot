@@ -2,20 +2,23 @@
 
 9
 
+## Title
+
+Keep Going! 🔁
+
 ## Objective
 
 Use a while loop with robot.atGoal() to keep moving until you reach the goal. This teaches you about loops that run until a condition is met.
 
 ## Gameboard
 
-r*w*w**
-**w*w**
-**w*w**
-**w*w**
-**w*w**
-**w*w**
-**w*w**
-******g
+r*w*w*
+**w*w*
+**w*w*
+**w*w*
+**w*w*
+**w*w*
+*****g
 
 ## Tip
 
@@ -37,3 +40,14 @@ robot.atGoal()
 2) Inside the loop, check which direction you can move
 3) Move in that direction, then the loop will check again
 
+## Boilerplate
+
+function solveMaze() {
+  
+}
+
+solveMaze();
+
+## Requirements
+
+mustUseWhile: true

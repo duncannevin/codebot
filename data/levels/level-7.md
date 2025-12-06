@@ -2,20 +2,23 @@
 
 7
 
+## Title
+
+Decision Time ⚡
+
 ## Objective
 
 Use the robot.canMove() function to check if a path is clear before moving. This teaches conditional logic!
 
 ## Gameboard
 
-r*w****
-**w****
-**w**w**
-**w**w**
-**w**w**
-**w**w**
-**w**w**
-******g
+r*w***
+**w***
+**w*w*
+**w*w*
+**w*w*
+**w*w*
+*****g
 
 ## Tip
 
@@ -37,3 +40,14 @@ robot.atGoal()
 2) If you can't move right, try moving down instead
 3) Use if/else statements to make decisions based on canMove()
 
+## Boilerplate
+
+function solveMaze() {
+  
+}
+
+solveMaze();
+
+## Requirements
+
+mustUseConditional: true

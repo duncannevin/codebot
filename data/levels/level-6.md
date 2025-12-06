@@ -2,20 +2,21 @@
 
 6
 
+## Title
+
+Double Loop 🔁
+
 ## Objective
 
 Use nested loops (a loop inside another loop) to navigate a grid pattern to the goal.
 
 ## Gameboard
 
-r******
-*w*w*w*
-*******
-*w*w*w*
-******g
-********
-********
-********
+r*****
+*w*w*w
+******
+*w*w*w
+*****g
 
 ## Tip
 
@@ -36,3 +37,10 @@ robot.canMove(direction)
 3) Repeat this pattern until you reach the goal
 4) Try using nested loops: one for horizontal movement, one for the pattern
 
+## Boilerplate
+
+function solveMaze() {
+  
+}
+
+solveMaze();

@@ -16,14 +16,26 @@ interface GameInterfaceProps {
   initialLevel?: number;
 }
 
+interface LevelRequirements {
+  maxMoves?: number;
+  mustUseLoop?: boolean;
+  mustUseFunction?: boolean;
+  mustUseConditional?: boolean;
+  mustUseWhile?: boolean;
+  mustUseFor?: boolean;
+}
+
 interface LevelData {
   order: number;
+  title?: string;
   objective: string;
   gameboard: string[];
   tip: string;
   availableFunctions: string[];
   hints: string[];
   gameState: GameState;
+  boilerplate?: string;
+  requirements?: LevelRequirements;
 }
 
 export default function GameInterface({ user, initialLevel }: GameInterfaceProps) {
@@ -48,6 +60,9 @@ export default function GameInterface({ user, initialLevel }: GameInterfaceProps
     best_moves?: number;
     best_time?: number;
   }>({ attempts: 0 });
+  const [executionResult, setExecutionResult] = useState<{
+    requirements?: { passed: boolean; failures: string[] };
+  } | null>(null);
   const wsRef = useRef<WebSocket | null>(null);
 
   // Fetch level data and stats
@@ -67,16 +82,19 @@ export default function GameInterface({ user, initialLevel }: GameInterfaceProps
         const data: LevelData = await response.json();
         setLevelData(data);
         setGameState(data.gameState);
-        setCode(`function solveMaze() {
+        // Use boilerplate if available, otherwise use default template
+        const initialCode = data.boilerplate || `function solveMaze() {
   
 }
 
-solveMaze();`);
+solveMaze();`;
+        setCode(initialCode);
         setConsoleOutput([]);
         setShowWinModal(false);
         setHasShownWinModal(false);
         setStartTime(null);
         setElapsedTime(0);
+        setExecutionResult(null);
 
         // Load level stats
         try {
@@ -242,6 +260,10 @@ solveMaze();`);
                 };
               });
               setConsoleOutput((prev) => [...prev, data.result?.message || 'Execution complete']);
+              // Store execution result for requirements validation
+              if (data.result) {
+                setExecutionResult({ requirements: data.result.requirements });
+              }
               
               // Save stats when execution completes
               if (gameState && startTime) {
@@ -358,6 +380,7 @@ solveMaze();`);
           code,
           gameState,
           speed: gameState.executionSpeed,
+          requirements: levelData?.requirements,
         };
         console.log('[WebSocket Client] Sending execute_code:', JSON.stringify(message, null, 2));
         wsRef.current.send(JSON.stringify(message));
@@ -374,6 +397,7 @@ solveMaze();`);
             gameState,
             executionMode: 'run',
             speed: gameState.executionSpeed,
+            requirements: levelData?.requirements,
           }),
         });
 
@@ -436,6 +460,9 @@ solveMaze();`);
               },
             };
           });
+          // Store execution result for requirements validation
+          setExecutionResult({ requirements: data.result.requirements });
+          
           // Save stats when execution completes
           if (gameState && startTime) {
             const timeElapsed = Math.floor((Date.now() - startTime) / 1000);
@@ -594,16 +621,12 @@ solveMaze();`);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params?.levelId, maxUnlockedLevel]);
 
-  if (loading || !gameState || !levelData) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-blue-600 border-t-transparent"></div>
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-slate-50 relative">
+      {/* Loading Overlay */}
+      {(loading || !gameState || !levelData) && (
+        <div className="absolute inset-0 z-50 bg-white/80 backdrop-blur-sm" />
+      )}
       {/* Top Navigation */}
       <nav className="border-b border-gray-200 bg-white">
         <div className="mx-auto flex max-w-[1400px] items-center justify-between px-6 py-4">
@@ -672,15 +695,17 @@ solveMaze();`);
       <div className="relative mx-auto flex max-w-[1400px] gap-6 p-6">
         {/* Left Panel - Maze Arena */}
         <div className="flex-1">
-          <MazeArena gameState={gameState} />
-          <GameControls
-            onRun={handleRunCode}
-            onStep={handleStep}
-            onReset={handleReset}
-            onSpeedChange={handleSpeedChange}
-            isExecuting={gameState.isExecuting}
-            speed={gameState.executionSpeed}
-          />
+          {gameState && <MazeArena gameState={gameState} title={levelData?.title} />}
+          {gameState && (
+            <GameControls
+              onRun={handleRunCode}
+              onStep={handleStep}
+              onReset={handleReset}
+              onSpeedChange={handleSpeedChange}
+              isExecuting={gameState.isExecuting}
+              speed={gameState.executionSpeed}
+            />
+          )}
         </div>
 
         {/* Right Panel - Code Editor & Info */}
@@ -770,7 +795,7 @@ solveMaze();`);
                 </ul>
               </div>
             )}
-            {activeTab === 'stats' && (
+            {activeTab === 'stats' && gameState && (
               <div className="p-6">
                 <GameStats gameState={gameState} levelStats={levelStats} elapsedTime={elapsedTime} />
               </div>
@@ -778,23 +803,80 @@ solveMaze();`);
             {activeTab === 'functions' && (
               <div className="p-6">
                 <div className="rounded-lg border border-gray-200 bg-white p-4">
-                  <h3 className="mb-3 text-center text-sm font-semibold text-slate-800">
+                  <h3 className="mb-4 text-center text-sm font-semibold text-slate-800">
                     Available Functions
                   </h3>
-                  <div className="space-y-1 font-mono text-xs text-blue-500">
+                  <div className="space-y-4">
                     {levelData?.availableFunctions && levelData.availableFunctions.length > 0 ? (
                       levelData.availableFunctions.map((func, index) => (
-                        <div key={index}>{func}</div>
+                        <div key={index} className="border-b border-gray-100 pb-2 last:border-b-0">
+                          <div className="font-mono text-xs font-semibold text-blue-600">{func}</div>
+                        </div>
                       ))
                     ) : (
                       <>
-                        <div>robot.moveUp()</div>
-                        <div>robot.moveDown()</div>
-                        <div>robot.moveLeft()</div>
-                        <div>robot.moveRight()</div>
-                        <div>robot.canMove(direction)</div>
-                        <div>robot.isWall(direction)</div>
-                        <div>robot.atGoal()</div>
+                        <div className="border-b border-gray-100 pb-3">
+                          <div className="font-mono text-xs font-semibold text-blue-600 mb-1">
+                            robot.moveUp()
+                          </div>
+                          <div className="text-xs text-slate-600">
+                            Moves the robot one cell up. Returns true if successful, false if blocked by a wall or boundary.
+                          </div>
+                        </div>
+                        <div className="border-b border-gray-100 pb-3">
+                          <div className="font-mono text-xs font-semibold text-blue-600 mb-1">
+                            robot.moveDown()
+                          </div>
+                          <div className="text-xs text-slate-600">
+                            Moves the robot one cell down. Returns true if successful, false if blocked by a wall or boundary.
+                          </div>
+                        </div>
+                        <div className="border-b border-gray-100 pb-3">
+                          <div className="font-mono text-xs font-semibold text-blue-600 mb-1">
+                            robot.moveLeft()
+                          </div>
+                          <div className="text-xs text-slate-600">
+                            Moves the robot one cell left. Returns true if successful, false if blocked by a wall or boundary.
+                          </div>
+                        </div>
+                        <div className="border-b border-gray-100 pb-3">
+                          <div className="font-mono text-xs font-semibold text-blue-600 mb-1">
+                            robot.moveRight()
+                          </div>
+                          <div className="text-xs text-slate-600">
+                            Moves the robot one cell right. Returns true if successful, false if blocked by a wall or boundary.
+                          </div>
+                        </div>
+                        <div className="border-b border-gray-100 pb-3">
+                          <div className="font-mono text-xs font-semibold text-blue-600 mb-1">
+                            robot.canMove(direction)
+                          </div>
+                          <div className="text-xs text-slate-600 mb-1">
+                            Checks if the robot can move in the specified direction. Returns true if the next cell is not a wall and is within bounds.
+                          </div>
+                          <div className="text-xs text-slate-500 italic">
+                            Parameters: direction - 'up' | 'down' | 'left' | 'right'
+                          </div>
+                        </div>
+                        <div className="border-b border-gray-100 pb-3">
+                          <div className="font-mono text-xs font-semibold text-blue-600 mb-1">
+                            robot.isWall(direction)
+                          </div>
+                          <div className="text-xs text-slate-600 mb-1">
+                            Checks if there is a wall in the specified direction. Returns true if the next cell is a wall or out of bounds (boundaries are treated as walls).
+                          </div>
+                          <div className="text-xs text-slate-500 italic">
+                            Parameters: direction - 'up' | 'down' | 'left' | 'right'
+                          </div>
+                        </div>
+                        <div className="pb-3">
+                          <div className="font-mono text-xs font-semibold text-blue-600 mb-1">
+                            robot.atGoal()
+                          </div>
+                          <div className="text-xs text-slate-600">
+                            Checks if the robot has reached the goal. Returns true if the robot is at the goal position, false otherwise.
+                          </div>
+                        </div>
                       </>
                     )}
                   </div>
@@ -811,8 +893,42 @@ solveMaze();`);
                   Challenge Objective:
                 </h4>
                 <p className="text-xs text-slate-600 whitespace-pre-line">
-                  {levelData.objective}
+                  {levelData?.objective || 'Loading...'}
                 </p>
+                {levelData.requirements && (
+                  (levelData.requirements.maxMoves !== undefined ||
+                   levelData.requirements.mustUseLoop ||
+                   levelData.requirements.mustUseWhile ||
+                   levelData.requirements.mustUseFor ||
+                   levelData.requirements.mustUseFunction ||
+                   levelData.requirements.mustUseConditional) && (
+                    <div className="mt-3 rounded-lg border border-blue-200 bg-blue-50 p-3">
+                      <h5 className="mb-2 text-xs font-semibold text-blue-800">
+                        Requirements:
+                      </h5>
+                      <ul className="space-y-1 text-xs text-blue-700">
+                        {levelData.requirements.maxMoves !== undefined && (
+                          <li>• Complete in {levelData.requirements.maxMoves} moves or less</li>
+                        )}
+                        {levelData.requirements.mustUseLoop && (
+                          <li>• Must use a loop (for or while)</li>
+                        )}
+                        {levelData.requirements.mustUseWhile && (
+                          <li>• Must use a while loop</li>
+                        )}
+                        {levelData.requirements.mustUseFor && (
+                          <li>• Must use a for loop</li>
+                        )}
+                        {levelData.requirements.mustUseFunction && (
+                          <li>• Must define and use a custom function</li>
+                        )}
+                        {levelData.requirements.mustUseConditional && (
+                          <li>• Must use conditional logic (if/else)</li>
+                        )}
+                      </ul>
+                    </div>
+                  )
+                )}
               </div>
               <div className="flex gap-3">
                 <button
@@ -825,7 +941,7 @@ solveMaze();`);
                 <button
                   onClick={() => {
                     const currentHintIndex = activeTab === 'hints' ? 0 : -1;
-                    if (currentHintIndex >= 0 && levelData.hints[currentHintIndex]) {
+                    if (currentHintIndex >= 0 && levelData?.hints?.[currentHintIndex]) {
                       setActiveTab('hints');
                     } else {
                       setActiveTab('hints');
@@ -863,6 +979,32 @@ solveMaze();`);
                   <div className="text-sm text-slate-600">
                     <div className="mb-2">Moves used: <span className="font-semibold text-blue-600">{gameState.moves}</span></div>
                     <div>Max moves: <span className="font-semibold text-blue-600">{gameState.maxMoves}</span></div>
+                  </div>
+                </div>
+              )}
+              {executionResult?.requirements && (
+                <div className={`mb-6 rounded-lg p-4 ${
+                  executionResult.requirements.passed 
+                    ? 'bg-green-50 border border-green-200' 
+                    : 'bg-yellow-50 border border-yellow-200'
+                }`}>
+                  <div className="text-sm">
+                    <div className={`font-semibold mb-2 ${
+                      executionResult.requirements.passed 
+                        ? 'text-green-800' 
+                        : 'text-yellow-800'
+                    }`}>
+                      {executionResult.requirements.passed 
+                        ? '✅ All Requirements Met!' 
+                        : '⚠️ Requirements Not Met:'}
+                    </div>
+                    {executionResult.requirements.failures.length > 0 && (
+                      <ul className="text-xs text-yellow-700 space-y-1 list-disc list-inside">
+                        {executionResult.requirements.failures.map((failure, index) => (
+                          <li key={index}>{failure}</li>
+                        ))}
+                      </ul>
+                    )}
                   </div>
                 </div>
               )}

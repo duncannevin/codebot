@@ -22,10 +22,10 @@ export function createWebSocketServer(port: number = 3001) {
         console.log('[WebSocket Server] Received message:', JSON.stringify(data, null, 2));
         
         if (data.type === 'execute_code') {
-          const { code, gameState, speed } = data;
+          const { code, gameState, speed, requirements } = data;
           
           // Create executor (this will reset the robot)
-          const executor = new CodeExecutor(gameState as GameState);
+          const executor = new CodeExecutor(gameState as GameState, requirements);
           
           // Send updates via WebSocket in real-time
           executor.onMove((eventData) => {

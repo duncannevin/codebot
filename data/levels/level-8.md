@@ -2,20 +2,23 @@
 
 8
 
+## Title
+
+Function Junction 🛤️
+
 ## Objective
 
 Create a function to move in a specific pattern, then call it multiple times. Learn about code reuse!
 
 ## Gameboard
 
-r******
-*w*w*w*
-*******
-*w*w*w*
-*******
-*w*w*w*
-******g
-********
+r*****
+*w*w*w
+******
+*w*w*w
+******
+*w*w*w
+*****g
 
 ## Tip
 
@@ -40,3 +43,14 @@ robot.canMove(direction)
 2) Call that function multiple times
 3) Functions help you avoid repeating the same code
 
+## Boilerplate
+
+function solveMaze() {
+  
+}
+
+solveMaze();
+
+## Requirements
+
+mustUseFunction: true

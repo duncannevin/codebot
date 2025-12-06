@@ -13,9 +13,9 @@ export default function CodeEditor({ code, onChange, consoleOutput }: CodeEditor
   return (
     <div className="overflow-hidden">
       {/* Code Editor */}
-      <div className="h-[500px] overflow-hidden rounded-t-lg">
+      <div className="h-[350px] overflow-hidden rounded-t-lg">
         <Editor
-          height="500px"
+          height="350px"
           defaultLanguage="javascript"
           value={code}
           onChange={(value) => onChange(value || '')}

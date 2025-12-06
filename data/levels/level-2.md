@@ -2,20 +2,20 @@
 
 2
 
+## Title
+
+Two Steps Forward 👣
+
 ## Objective
 
 Move the robot down, then right to reach the goal. Learn about calling multiple functions in sequence.
 
 ## Gameboard
 
-r******
-********
-******g
-********
-********
-********
-********
-********
+r***
+****
+***g
+****
 
 ## Tip
 
@@ -34,3 +34,10 @@ robot.moveDown()
 2) Then move right with robot.moveRight()
 3) The order matters - try switching them and see what happens!
 
+## Boilerplate
+
+function solveMaze() {
+  
+}
+
+solveMaze();

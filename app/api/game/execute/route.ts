@@ -23,16 +23,20 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Code is required' }, { status: 400 });
     }
 
-    // Get game state from level or use provided gameState
+    // Get game state and requirements from level or use provided gameState
     let gameState: GameState;
+    let requirements;
     if (clientGameState) {
       // Use gameState provided by client (from level data)
       gameState = clientGameState as GameState;
+      // Requirements should be passed from client if available
+      requirements = body.requirements;
     } else if (levelId) {
-      // Load level and use its gameState
+      // Load level and use its gameState and requirements
       try {
         const level = loadLevel(parseInt(levelId));
         gameState = level.gameState;
+        requirements = level.requirements;
       } catch (error: any) {
         return NextResponse.json(
           { error: `Failed to load level: ${error.message}` },
@@ -46,7 +50,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const executor = new CodeExecutor(gameState);
+    const executor = new CodeExecutor(gameState, requirements);
 
     // Store execution events
     const events: any[] = [];

@@ -30,12 +30,18 @@ export interface GameState {
   executionSpeed: number;
 }
 
+export interface RequirementValidation {
+  passed: boolean;
+  failures: string[];
+}
+
 export interface ExecutionResult {
   success: boolean;
   message: string;
   moves: number;
   reachedGoal: boolean;
   error?: string;
+  requirements?: RequirementValidation;
 }
 
 export interface CodeExecutionRequest {

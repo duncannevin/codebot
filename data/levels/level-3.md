@@ -2,20 +2,20 @@
 
 3
 
+## Title
+
+Around the Block 🧱
+
 ## Objective
 
 Navigate around a wall to reach the goal. This teaches you about obstacles and planning your path.
 
 ## Gameboard
 
-r******
-*w*****
-******g
-********
-********
-********
-********
-********
+r***
+*w**
+***g
+****
 
 ## Tip
 
@@ -34,3 +34,10 @@ robot.moveDown()
 2) Move down first to go around the wall
 3) Then move right to reach the goal
 
+## Boilerplate
+
+function solveMaze() {
+  
+}
+
+solveMaze();

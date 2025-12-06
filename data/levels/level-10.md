@@ -2,6 +2,10 @@
 
 10
 
+## Title
+
+The Grand Finale 🏆
+
 ## Objective
 
 Combine everything you've learned: loops, conditionals, and functions to navigate a complex maze to the goal.
@@ -10,14 +14,13 @@ Bonus: Complete in under 15 moves!
 
 ## Gameboard
 
-r*w*w*w*
-**w*w*w*
-**w*w*w*
-**w*w*w*
-**w*w*w*
-**w*w*w*
-**w*w*w*
-******g*
+r*w*w*w
+**w*w*w
+**w*w*w
+**w*w*w
+**w*w*w
+**w*w*w
+*****g
 
 ## Tip
 
@@ -39,3 +42,16 @@ robot.atGoal()
 2) Use a while loop to keep calling this function until you reach the goal
 3) This combines functions, loops, and conditionals - you're becoming a programmer!
 
+## Boilerplate
+
+function solveMaze() {
+  
+}
+
+solveMaze();
+
+## Requirements
+
+maxMoves: 15
+mustUseFunction: true
+mustUseConditional: true

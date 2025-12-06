@@ -1,13 +1,17 @@
 import { RobotController } from './robot';
 import type { GameState, ExecutionResult } from '../../types/game';
+import type { LevelRequirements } from './level-parser';
+import { validateRequirements } from './level-parser';
 
 export class CodeExecutor {
   private robot: RobotController;
   private gameState: GameState;
+  private requirements?: LevelRequirements;
   private executionCallbacks: Array<(data: any) => void> = [];
 
-  constructor(gameState: GameState) {
+  constructor(gameState: GameState, requirements?: LevelRequirements) {
     this.gameState = gameState;
+    this.requirements = requirements;
     // Create a fresh robot controller for each execution
     this.robot = new RobotController(gameState);
   }
@@ -31,6 +35,8 @@ export class CodeExecutor {
     // Reset robot to starting position before execution
     this.reset();
     const robot = this.robot;
+    // Store original code for requirements validation
+    const originalCode = code;
     
     // Ensure speed is a valid number (in milliseconds)
     const executionSpeed = typeof speed === 'number' && speed > 0 ? speed : 500;
@@ -190,6 +196,16 @@ export class CodeExecutor {
         ),
       ]);
 
+      // Validate requirements if level was completed
+      let requirementsValidation;
+      if (robot.hasReached()) {
+        requirementsValidation = validateRequirements(
+          originalCode,
+          this.requirements,
+          robot.getMoves()
+        );
+      }
+
       const result: ExecutionResult = {
         success: robot.hasReached(),
         message: robot.hasReached()
@@ -197,6 +213,7 @@ export class CodeExecutor {
           : '❌ Robot did not reach the goal',
         moves: robot.getMoves(),
         reachedGoal: robot.hasReached(),
+        requirements: requirementsValidation,
       };
 
       this.emit('execution_complete', result);
