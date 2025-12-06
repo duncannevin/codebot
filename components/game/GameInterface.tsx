@@ -208,7 +208,7 @@ solveMaze();`);
               if (startTime) {
                 setElapsedTime(Math.floor((Date.now() - startTime) / 1000));
               }
-              setConsoleOutput((prev) => [...prev, data.message]);
+              // Don't add message to console output - logs are local only
               // Show win modal when goal is reached
               if (data.reachedGoal && !hasShownWinModal) {
                 setShowWinModal(true);
@@ -412,7 +412,7 @@ solveMaze();`);
               if (startTime) {
                 setElapsedTime(Math.floor((Date.now() - startTime) / 1000));
               }
-              setConsoleOutput((prev) => [...prev, event.message]);
+              // Don't add message to console output - logs are local only
               // Show win modal when goal is reached
               if (event.reachedGoal && !hasShownWinModal) {
                 setShowWinModal(true);
@@ -535,6 +535,8 @@ solveMaze();`);
 
   const handleNextLevel = async () => {
     if (level < totalLevels) {
+      const nextLevel = level + 1;
+      
       // Save progress before moving to next level
       if (gameState && startTime) {
         const timeElapsed = Math.floor((Date.now() - startTime) / 1000); // in seconds
@@ -560,7 +562,15 @@ solveMaze();`);
           console.error('Error saving progress:', error);
         }
       }
-      handleLevelChange(level + 1);
+      
+      // Close modal and navigate to next level
+      setShowWinModal(false);
+      setHasShownWinModal(false);
+      setLevel(nextLevel);
+      setProgress((prev) => ({ ...prev, current: nextLevel }));
+      // Update maxUnlockedLevel to allow navigation (since we just completed the level)
+      setMaxUnlockedLevel(nextLevel);
+      router.push(`/game/${nextLevel}`);
     }
   };
 
@@ -624,7 +634,7 @@ solveMaze();`);
             </div>
             <button
               onClick={() => handleLevelChange(level + 1)}
-              disabled={level >= totalLevels}
+              disabled={level >= totalLevels || level + 1 > maxUnlockedLevel}
               className="rounded-lg border border-gray-300 px-3 py-1 text-sm text-slate-600 disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
             >
               →
@@ -783,6 +793,7 @@ solveMaze();`);
                         <div>robot.moveLeft()</div>
                         <div>robot.moveRight()</div>
                         <div>robot.canMove(direction)</div>
+                        <div>robot.isWall(direction)</div>
                         <div>robot.atGoal()</div>
                       </>
                     )}
@@ -839,7 +850,7 @@ solveMaze();`);
 
       {/* Win Modal */}
       {showWinModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-20">
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
           <div className="relative w-full max-w-md rounded-2xl bg-white p-8 shadow-xl">
             <div className="text-center">
               <div className="mb-4 text-6xl">🎉</div>

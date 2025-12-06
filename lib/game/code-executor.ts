@@ -41,36 +41,58 @@ export class CodeExecutor {
     // Queue system to ensure movements execute sequentially with delays
     let movementQueue: Promise<boolean> = Promise.resolve(true);
     
-    // Helper to queue a movement
-    const queueMovement = (movementFn: () => boolean, direction: string): boolean => {
-      movementQueue = movementQueue.then(async () => {
-        const moved = movementFn();
+    // Helper to queue a movement - returns a promise that resolves after visualization
+    const queueMovement = async (movementFn: () => boolean, direction: string, functionName: string): Promise<boolean> => {
+      // Log server-side only
+      console.log(`robot.${functionName}`);
+      
+      // Wait for previous movements to complete visualization first
+      await movementQueue;
+      
+      // Now execute the movement (position updates here)
+      const moved = movementFn();
+      
+      // Create a promise for this movement's visualization
+      const visualizationPromise = (async () => {
+        // Emit robot_move event for game state updates (without message)
         this.emit('robot_move', {
           position: robot.getPosition(),
           moves: robot.getMoves(),
           reachedGoal: robot.hasReached(),
-          message: moved
-            ? `→ Robot moved ${direction} (${robot.getMoves()}/${this.gameState.maxMoves})`
-            : `→ Cannot move ${direction} (wall or boundary)`,
         });
+        
         // Add delay for real-time visualization - use executionSpeed
         await delay(executionSpeed);
+        
         return moved;
-      });
-      // Return immediately (synchronous from user's perspective)
-      return true;
+      })();
+      
+      // Update the queue to track this movement's completion
+      movementQueue = visualizationPromise;
+      
+      // Wait for this movement's visualization to complete
+      await visualizationPromise;
+      
+      // Return the actual result of the movement
+      return moved;
     };
     
-    // Create robot API that the user code can call (synchronous methods with automatic delays)
+    // Create robot API that the user code can call (async methods that wait for visualization)
     const robotAPI = {
-      moveUp: () => queueMovement(() => robot.moveUp(), 'up'),
-      moveDown: () => queueMovement(() => robot.moveDown(), 'down'),
-      moveLeft: () => queueMovement(() => robot.moveLeft(), 'left'),
-      moveRight: () => queueMovement(() => robot.moveRight(), 'right'),
+      moveUp: () => queueMovement(() => robot.moveUp(), 'up', 'moveUp()'),
+      moveDown: () => queueMovement(() => robot.moveDown(), 'down', 'moveDown()'),
+      moveLeft: () => queueMovement(() => robot.moveLeft(), 'left', 'moveLeft()'),
+      moveRight: () => queueMovement(() => robot.moveRight(), 'right', 'moveRight()'),
       canMove: (direction: 'up' | 'down' | 'left' | 'right') => {
+        console.log(`robot.canMove('${direction}')`);
         return robot.canMove(direction);
       },
+      isWall: (direction: 'up' | 'down' | 'left' | 'right') => {
+        console.log(`robot.isWall('${direction}')`);
+        return robot.isWall(direction);
+      },
       atGoal: () => {
+        console.log('robot.atGoal()');
         return robot.atGoal();
       },
     };
@@ -81,6 +103,7 @@ export class CodeExecutor {
       
       // Check if code defines solveMaze function (with or without async)
       const hasSolveMazeDef = /(async\s+)?function\s+solveMaze\s*\(/.test(wrappedCode);
+      const isSolveMazeAsync = /async\s+function\s+solveMaze\s*\(/.test(wrappedCode);
       
       // Check if solveMaze is called anywhere (excluding the definition itself)
       const lines = wrappedCode.split('\n');
@@ -99,17 +122,30 @@ export class CodeExecutor {
         }
       }
       
-      // If solveMaze is defined but not called, add the call (without await)
+      // Make solveMaze async if it's not already (needed for await on robot movements)
+      if (hasSolveMazeDef && !isSolveMazeAsync) {
+        wrappedCode = wrappedCode.replace(
+          /function\s+solveMaze\s*\(/g,
+          'async function solveMaze('
+        );
+      }
+      
+      // Transform robot movement calls to be awaited automatically
+      // This ensures movements are visualized even in loops
+      wrappedCode = wrappedCode.replace(
+        /robot\.(moveUp|moveDown|moveLeft|moveRight)\(\)/g,
+        'await robot.$1()'
+      );
+      
+      // If solveMaze is defined but not called, add the call (with await since it's now async)
       if (hasSolveMazeDef && !hasSolveMazeCall) {
-        wrappedCode = `${wrappedCode}\n\nsolveMaze();`;
+        wrappedCode = `${wrappedCode}\n\nawait solveMaze();`;
       }
       
       // Wrap in async IIFE to handle robot movement promises automatically
       wrappedCode = `
         (async function() {
           ${wrappedCode}
-          // Wait for all pending robot movements to complete
-          await new Promise(resolve => setTimeout(resolve, ${executionSpeed + 100}));
         })();
       `;
 

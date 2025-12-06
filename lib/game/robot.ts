@@ -86,6 +86,35 @@ export class RobotController {
     return cell.type !== 'wall';
   }
 
+  isWall(direction: Direction): boolean {
+    let delta: Position;
+    switch (direction) {
+      case 'up':
+        delta = { x: 0, y: -1 };
+        break;
+      case 'down':
+        delta = { x: 0, y: 1 };
+        break;
+      case 'left':
+        delta = { x: -1, y: 0 };
+        break;
+      case 'right':
+        delta = { x: 1, y: 0 };
+        break;
+    }
+
+    const newX = this.position.x + delta.x;
+    const newY = this.position.y + delta.y;
+
+    // Check bounds - if out of bounds, treat as wall
+    if (newX < 0 || newY < 0 || newY >= this.maze.length || newX >= this.maze[0].length) {
+      return true;
+    }
+
+    const cell = this.maze[newY][newX];
+    return cell.type === 'wall';
+  }
+
   atGoal(): boolean {
     return this.hasReachedGoal;
   }
